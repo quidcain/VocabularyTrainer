@@ -3,6 +3,8 @@ package course.gui;
 import course.gui.JTextFieldLimit;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -56,6 +58,7 @@ public class GuiMain {
         jpLogin.add(buttonLogin,c);
         c.gridy = 5;
         c.gridwidth = 3;
+        c.weighty = 1;
         jpLogin.add(labelLog,c);
 
         buttonLogin.addActionListener(new ActionListener() {
@@ -86,6 +89,10 @@ public class GuiMain {
         JTextField textFieldPass = new JTextField();
         textFieldPass.setPreferredSize(new Dimension(220, 20));
         textFieldPass.setDocument(passLimit);
+        JLabel labelRepeatPass = new JLabel("Повторите пароль:");
+        JTextField textFieldRepeatPass = new JTextField();
+        textFieldRepeatPass.setPreferredSize(new Dimension(220, 20));
+        textFieldRepeatPass.setDocument(new JTextFieldLimit(20));
         JButton buttonLogin = new JButton("Зарегистрироваться");
         JLabel labelLog = new JLabel();
         labelLog.setForeground(Color.green);
@@ -110,9 +117,17 @@ public class GuiMain {
         c.insets = new Insets(10,0,5,0);
         c.gridy = 4;
         c.gridwidth = 1;
-        jpSignup.add(buttonLogin,c);
+        jpSignup.add(labelRepeatPass,c);
+        c.insets = new Insets(5,0,5,0);
         c.gridy = 5;
-        c.gridwidth = 3;
+        c.gridwidth = 2;
+        jpSignup.add(textFieldRepeatPass,c);
+        c.insets = new Insets(10,0,10,0);
+        c.gridy = 6;
+        jpSignup.add(buttonLogin,c);
+        c.gridy = 7;
+        c.weighty = 1;
+        c.insets = new Insets(0,0,10,0);
         jpSignup.add(labelLog,c);
 
         buttonLogin.addActionListener(new ActionListener() {
@@ -134,8 +149,8 @@ public class GuiMain {
     GuiMain() {
         jfrm = new JFrame("И снова здравствуйте");
         jfrm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        jfrm.setSize(290, 280);
-        jfrm.setMinimumSize(new Dimension(290, 280));
+        jfrm.setSize(290, 360);
+        jfrm.setMinimumSize(new Dimension(290, 360));
 
         mainPanel = new JPanel(new CardLayout());
 
@@ -151,6 +166,7 @@ public class GuiMain {
 
         tabPanel.addTab("Вход", jpLogin);
         tabPanel.addTab("Регистрация", jpSignup);
+        tabPanel.setPreferredSize(new Dimension(220, 280));
         GridBagConstraints c = new GridBagConstraints();
         c.gridx = 0;
         c.gridy = 0;
