@@ -19,35 +19,45 @@ public class GuiMain {
     private JTextFieldLimit nickLimit;
     private JTextFieldLimit passLimit;
     private void setLogin(){
-        jpLogin = new JPanel();
-        jpLogin.setLayout(new BoxLayout(jpLogin, BoxLayout.Y_AXIS));
-        jpLogin.setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
+        jpLogin = new JPanel(new GridBagLayout());
 
         JLabel labelNick = new JLabel("Ваш никнейм:");
-        labelNick.setMaximumSize(new Dimension(9999, 15));
         JTextField textFieldNick = new JTextField();
+        textFieldNick.setPreferredSize(new Dimension(220, 20));
         textFieldNick.setDocument(nickLimit);
-        textFieldNick.setMaximumSize(new Dimension(9999, 25));
         JLabel labelPass = new JLabel("Ваш пароль:");
-        labelPass.setMaximumSize(new Dimension(9999, 15));
         JTextField textFieldPass = new JTextField();
-        textFieldPass.setMaximumSize(new Dimension(9999, 25));
+        textFieldPass.setPreferredSize(new Dimension(220, 20));
         textFieldPass.setDocument(passLimit);
         JButton buttonLogin = new JButton("Войти");
         JLabel labelLog = new JLabel();
         labelLog.setForeground(Color.red);
 
-        jpLogin.add(labelNick);
-        jpLogin.add(Box.createRigidArea(new Dimension(0, 5)));
-        jpLogin.add(textFieldNick);
-        jpLogin.add(Box.createRigidArea(new Dimension(0, 15)));
-        jpLogin.add(labelPass);
-        jpLogin.add(Box.createRigidArea(new Dimension(0, 5)));
-        jpLogin.add(textFieldPass);
-        jpLogin.add(Box.createRigidArea(new Dimension(0, 15)));
-        jpLogin.add(buttonLogin);
-        jpLogin.add(Box.createRigidArea(new Dimension(0, 15)));
-        jpLogin.add(labelLog);
+        GridBagConstraints c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 0;
+        c.anchor = GridBagConstraints.LINE_START;
+        c.insets = new Insets(5,0,5,0);
+        jpLogin.add(labelNick, c);
+        c.gridy = 1;
+        c.gridwidth = 2;
+        jpLogin.add(textFieldNick,c);
+        c.insets = new Insets(10,0,5,0);
+        c.gridy = 2;
+        c.gridwidth = 1;
+        jpLogin.add(labelPass,c);
+        c.insets = new Insets(5,0,5,0);
+        c.gridy = 3;
+        c.gridwidth = 2;
+        jpLogin.add(textFieldPass,c);
+        c.insets = new Insets(10,0,5,0);
+        c.gridy = 4;
+        c.gridwidth = 1;
+        jpLogin.add(buttonLogin,c);
+        c.gridy = 5;
+        c.gridwidth = 3;
+        jpLogin.add(labelLog,c);
+
         buttonLogin.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -55,7 +65,7 @@ public class GuiMain {
                 String password = textFieldPass.getText();
                 labelLog.setText("");
                 if (nickname.equals("") || password.equals("")) {
-                    labelLog.setText("Пароль и логин не могут быть пусты!");
+                    labelLog.setText("<html>Пароль и логин<br> не могут быть пусты!</html>");
                     return;
                 }
                 //CardLayout cl = (CardLayout)(mainPanel.getLayout());
@@ -65,30 +75,60 @@ public class GuiMain {
 
     }
     private void setSignup(){
-        jpSignup = new JPanel();
-        jpSignup.setLayout(new BoxLayout(jpSignup, BoxLayout.Y_AXIS));
-        jpSignup.setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
+
+        jpSignup = new JPanel(new GridBagLayout());
 
         JLabel labelNick = new JLabel("Ваш никнейм:");
-        labelNick.setMaximumSize(new Dimension(9999, 15));
         JTextField textFieldNick = new JTextField();
-        textFieldNick.setMaximumSize(new Dimension(9999, 25));
+        textFieldNick.setPreferredSize(new Dimension(220, 20));
         textFieldNick.setDocument(nickLimit);
         JLabel labelPass = new JLabel("Ваш пароль:");
-        labelPass.setMaximumSize(new Dimension(9999, 15));
         JTextField textFieldPass = new JTextField();
-        textFieldPass.setMaximumSize(new Dimension(9999, 25));
+        textFieldPass.setPreferredSize(new Dimension(220, 20));
         textFieldPass.setDocument(passLimit);
-        JButton buttonSignup = new JButton("Зарегестрироваться");
-        jpSignup.add(labelNick);
-        jpSignup.add(Box.createRigidArea(new Dimension(0, 5)));
-        jpSignup.add(textFieldNick);
-        jpSignup.add(Box.createRigidArea(new Dimension(0, 15)));
-        jpSignup.add(labelPass);
-        jpSignup.add(Box.createRigidArea(new Dimension(0, 5)));
-        jpSignup.add(textFieldPass);
-        jpSignup.add(Box.createRigidArea(new Dimension(0, 15)));
-        jpSignup.add(buttonSignup);
+        JButton buttonLogin = new JButton("Зарегистрироваться");
+        JLabel labelLog = new JLabel();
+        labelLog.setForeground(Color.green);
+
+        GridBagConstraints c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 0;
+        c.anchor = GridBagConstraints.LINE_START;
+        c.insets = new Insets(5,0,5,0);
+        jpSignup.add(labelNick, c);
+        c.gridy = 1;
+        c.gridwidth = 2;
+        jpSignup.add(textFieldNick,c);
+        c.insets = new Insets(10,0,5,0);
+        c.gridy = 2;
+        c.gridwidth = 1;
+        jpSignup.add(labelPass,c);
+        c.insets = new Insets(5,0,5,0);
+        c.gridy = 3;
+        c.gridwidth = 2;
+        jpSignup.add(textFieldPass,c);
+        c.insets = new Insets(10,0,5,0);
+        c.gridy = 4;
+        c.gridwidth = 1;
+        jpSignup.add(buttonLogin,c);
+        c.gridy = 5;
+        c.gridwidth = 3;
+        jpSignup.add(labelLog,c);
+
+        buttonLogin.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String nickname = textFieldNick.getText();
+                String password = textFieldPass.getText();
+                labelLog.setText("");
+                if (!nickname.equals("") && !password.equals("")) {
+                    labelLog.setText("<html>Аккаунт успешно создан!</html>");
+                    return;
+                }
+                //CardLayout cl = (CardLayout)(mainPanel.getLayout());
+                //cl.show(mainPanel, SMTHANOTHER);
+            }
+        });
 
     }
     GuiMain() {
