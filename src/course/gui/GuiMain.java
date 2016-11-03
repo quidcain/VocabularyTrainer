@@ -8,6 +8,11 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.HashMap;
 
 /**
@@ -88,7 +93,7 @@ public class GuiMain {
                         @Override
                         public void run(){
                             try {
-                                Thread.currentThread().sleep(1000);
+                                Thread.sleep(1000);
                             } catch (InterruptedException e1) {
                                 e1.printStackTrace();
                             }
@@ -162,13 +167,37 @@ public class GuiMain {
             public void actionPerformed(ActionEvent e) {
                 String nickname = textFieldNick.getText();
                 String password = textFieldPass.getText();
+                String repeatedPassword = textFieldRepeatPass.getText();
+                labelLog.setForeground(Color.red);
                 labelLog.setText("");
-                if (!nickname.equals("") && !password.equals("")) {
+                /*if (nickname.equals("") || password.equals("")) {
                     labelLog.setText("<html>Аккаунт успешно создан!</html>");
                     return;
+                }*/
+                if (nickname.equals("") || password.equals("")) {
+                    labelLog.setText("<html>Пароль и логин не могут быть пусты!</html>");
+                    return;
+                }else if (!password.equals(repeatedPassword)) {
+                    labelLog.setText("Пароли не совпадают!");
+                    return;
+                }else if(accounts.containsKey(nickname)){
+                    labelLog.setText("Такой пользователь уже существует!");
+                    return;
+                }else {
+                    accounts.put(nickname, password);
+                    try (PreparedStatement statement = db.getConnection().prepareStatement("INSERT INTO accounts (nickname, password) VALUES (?,?);")) {
+                        statement.setString(1, nickname);
+                        statement.setString(2, password);
+                        int changedRows = statement.executeUpdate();
+                        if (changedRows > 0) {
+                            labelLog.setForeground(Color.green);
+                            labelLog.setText("Successfully sign up!");
+                        } else
+                            labelLog.setText("Some troubles...");
+                    } catch (SQLException sqlEx) {
+                        System.out.println(sqlEx.getMessage());
+                    }
                 }
-                //CardLayout cl = (CardLayout)(mainPanel.getLayout());
-                //cl.show(mainPanel, SMTHANOTHER);
             }
         });
 
