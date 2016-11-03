@@ -8,6 +8,7 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashMap;
 
 /**
  * Created by user on 31.10.2016.
@@ -20,6 +21,9 @@ public class GuiMain {
     private String SMTHANOTHER = "Что-то другое";
     private JTextFieldLimit nickLimit;
     private JTextFieldLimit passLimit;
+
+    private Database db;
+    private HashMap<String, String> accounts;
     private void setLogin(){
         jpLogin = new JPanel(new GridBagLayout());
 
@@ -66,13 +70,36 @@ public class GuiMain {
             public void actionPerformed(ActionEvent e) {
                 String nickname = textFieldNick.getText();
                 String password = textFieldPass.getText();
+                labelLog.setForeground(Color.red);
                 labelLog.setText("");
                 if (nickname.equals("") || password.equals("")) {
                     labelLog.setText("<html>Пароль и логин<br> не могут быть пусты!</html>");
                     return;
                 }
-                //CardLayout cl = (CardLayout)(mainPanel.getLayout());
-                //cl.show(mainPanel, SMTHANOTHER);
+                String actualPass = accounts.get(nickname);
+                if (actualPass == null)
+                    labelLog.setText("There is no such user in database");
+                else if (!actualPass.equals(password))
+                    labelLog.setText("Incorrect password");
+                else {
+                    labelLog.setForeground(Color.green);
+                    labelLog.setText("Successfully logined!");
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run(){
+                            try {
+                                Thread.currentThread().sleep(1000);
+                            } catch (InterruptedException e1) {
+                                e1.printStackTrace();
+                            }
+                            CardLayout cl = (CardLayout)(mainPanel.getLayout());
+                            cl.show(mainPanel, SMTHANOTHER);
+                        }
+                    }).start();
+
+
+                }
+
             }
         });
 
@@ -147,10 +174,14 @@ public class GuiMain {
 
     }
     GuiMain() {
+        db = new Database();
+        db.createConnection();
+        accounts = db.getAccounts();
+
         jfrm = new JFrame("И снова здравствуйте");
         jfrm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        jfrm.setSize(290, 360);
-        jfrm.setMinimumSize(new Dimension(290, 360));
+        jfrm.setSize(290, 330);
+        jfrm.setMinimumSize(new Dimension(290, 330));
 
         mainPanel = new JPanel(new CardLayout());
 
