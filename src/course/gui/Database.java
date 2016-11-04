@@ -11,20 +11,19 @@ public class Database {
     private static final String LOGIN = "sa";
     private static final String PASSWORD = "";
     private Connection connection;
-    Database(){
-        try {
-            Class.forName("org.h2.Driver");
-        } catch (ClassNotFoundException e) {
-            System.out.println("Can't get driver: " + e.getMessage());
-            System.exit(1);
-        }
+    Database() throws ClassNotFoundException {
+        Class.forName("org.h2.Driver");
+
     }
-    public void createConnection(){
+    public void createConnection() throws SQLException{
+        connection = DriverManager.getConnection(DB_URL, LOGIN, PASSWORD);
+    }
+
+    public void closeConnection() {
         try {
-            connection = DriverManager.getConnection(DB_URL, LOGIN, PASSWORD);
+            connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
-            System.exit(1);
         }
     }
     public Connection getConnection() {
@@ -38,8 +37,16 @@ public class Database {
                 accounts.put(resultSet.getString("nickname"), resultSet.getString("password"));
             return accounts;
         } catch (SQLException e) {
+            //it can't happen
             System.out.println("Can't get connection: " + e.getMessage());
             return null;
+        }
+    }
+    public void createUserTable(String nickname){
+        try (PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + nickname + " (eng VARCHAR(255), rus VARCHAR(255));")) {
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
         }
     }
 }

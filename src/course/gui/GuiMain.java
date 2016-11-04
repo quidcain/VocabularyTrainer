@@ -1,16 +1,11 @@
 package course.gui;
 
-import course.gui.JTextFieldLimit;
-
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -20,17 +15,15 @@ import java.util.HashMap;
  */
 public class GuiMain {
     private JFrame jfrm;
-    private JPanel jpSignup, jpLogin, cardPanel1, cardPanel2, mainPanel;
-    private JTabbedPane tabPanel;
+    private JPanel mainPanel;
+
     private String AUTHORIZATION = "Авторизация";
     private String SMTHANOTHER = "Что-то другое";
-    private JTextFieldLimit nickLimit;
-    private JTextFieldLimit passLimit;
 
     private Database db;
     private HashMap<String, String> accounts;
-    private void setLogin(){
-        jpLogin = new JPanel(new GridBagLayout());
+    private JPanel loginInit(JTextFieldLimit nickLimit,JTextFieldLimit passLimit) {
+        JPanel jpLogin = new JPanel(new GridBagLayout());
 
         JLabel labelNick = new JLabel("Ваш никнейм:");
         JTextField textFieldNick = new JTextField();
@@ -89,6 +82,7 @@ public class GuiMain {
                 else {
                     labelLog.setForeground(Color.green);
                     labelLog.setText("Successfully logined!");
+                    db.createUserTable(nickname);
                     new Thread(new Runnable() {
                         @Override
                         public void run(){
@@ -101,17 +95,15 @@ public class GuiMain {
                             cl.show(mainPanel, SMTHANOTHER);
                         }
                     }).start();
-
-
                 }
-
             }
         });
+        return jpLogin;
 
     }
-    private void setSignup(){
+    private JPanel signupInit(JTextFieldLimit nickLimit,JTextFieldLimit passLimit) {
 
-        jpSignup = new JPanel(new GridBagLayout());
+        JPanel jpSignup = new JPanel(new GridBagLayout());
 
         JLabel labelNick = new JLabel("Ваш никнейм:");
         JTextField textFieldNick = new JTextField();
@@ -200,43 +192,67 @@ public class GuiMain {
                 }
             }
         });
-
+        return jpSignup;
     }
-    GuiMain() {
-        db = new Database();
-        db.createConnection();
-        accounts = db.getAccounts();
+    private JPanel cardPanel1Init() {
+        JPanel cardPanel = new JPanel(new GridBagLayout());
+        JTabbedPane tabPanel = new JTabbedPane();
+        JTextFieldLimit nickLimit = new JTextFieldLimit(20);
+        JTextFieldLimit passLimit = new JTextFieldLimit(20);
 
-        jfrm = new JFrame("И снова здравствуйте");
-        jfrm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        jfrm.setSize(290, 330);
-        jfrm.setMinimumSize(new Dimension(290, 330));
-
-        mainPanel = new JPanel(new CardLayout());
-
-        cardPanel1 = new JPanel(new GridBagLayout());
-        tabPanel = new JTabbedPane();
-
-        nickLimit = new JTextFieldLimit(20);
-        passLimit = new JTextFieldLimit(20);
-        setLogin();
-        setSignup();
-
-        cardPanel2 = new JPanel();
-
-        tabPanel.addTab("Вход", jpLogin);
-        tabPanel.addTab("Регистрация", jpSignup);
+        tabPanel.addTab("Вход", loginInit(nickLimit, passLimit));
+        tabPanel.addTab("Регистрация", signupInit(nickLimit, passLimit));
         tabPanel.setPreferredSize(new Dimension(220, 280));
         GridBagConstraints c = new GridBagConstraints();
         c.gridx = 0;
         c.gridy = 0;
         c.ipadx = 40;
-        cardPanel1.add(tabPanel, c);
-        mainPanel.add(cardPanel1, AUTHORIZATION);
-        mainPanel.add(cardPanel2, SMTHANOTHER);
+        cardPanel.add(tabPanel, c);
+        return cardPanel;
+    }
+    private JPanel cardPanel2Init() {
+        JPanel cardPanel = new JPanel(new BorderLayout());
+        JToolBar jtb = new JToolBar("Capabilities");
+        JButton buttonNewOwnWord = new JButton("Добавить слово");
+        jtb.add(buttonNewOwnWord);
+        JButton buttonTraining = new JButton("Тренировка");
+        jtb.add(buttonTraining);
+        cardPanel.add(jtb, BorderLayout.NORTH);
+        return cardPanel;
+    }
+    GuiMain() {
+        try {
+            db = new Database();
+            db.createConnection();
+        }catch(ClassNotFoundException|SQLException e) {
+            System.exit(1);
+        }
+        accounts = db.getAccounts();
+
+        jfrm = new JFrame("И снова здравствуйте");
+        jfrm.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        jfrm.setSize(290, 330);
+        jfrm.setMinimumSize(new Dimension(290, 330));
+
+        mainPanel = new JPanel(new CardLayout());
+        mainPanel.add(cardPanel1Init(), AUTHORIZATION);
+        mainPanel.add(cardPanel2Init(), SMTHANOTHER);
         jfrm.add(mainPanel);
         jfrm.setLocationRelativeTo(null);
         jfrm.setVisible(true);
+        jfrm.addWindowListener(new WindowListener() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                db.closeConnection();
+                System.exit(0);
+            }
+            public void windowActivated(WindowEvent event) {}
+            public void windowClosed(WindowEvent event){}
+            public void windowDeactivated(WindowEvent event){}
+            public void windowDeiconified(WindowEvent event){}
+            public void windowIconified(WindowEvent event) {}
+            public void windowOpened(WindowEvent event) {}
+        });
     }
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable(){
