@@ -1,6 +1,7 @@
 package course.gui;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -8,6 +9,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -22,6 +24,7 @@ public class GuiMain {
 
     private Database db;
     private HashMap<String, String> accounts;
+    ArrayList<WordsPair> entireSessionVocabularity;
     private JPanel loginInit(JTextFieldLimit nickLimit,JTextFieldLimit passLimit) {
         JPanel jpLogin = new JPanel(new GridBagLayout());
 
@@ -80,9 +83,11 @@ public class GuiMain {
                 else if (!actualPass.equals(password))
                     labelLog.setText("Incorrect password");
                 else {
+                    buttonLogin.setEnabled(false);
                     labelLog.setForeground(Color.green);
                     labelLog.setText("Successfully logined!");
-                    db.createUserTable(nickname);
+                    entireSessionVocabularity = db.getVocabulatiry(nickname);
+                    mainPanel.add(cardPanel2Init(nickname), SMTHANOTHER);
                     new Thread(new Runnable() {
                         @Override
                         public void run(){
@@ -210,14 +215,25 @@ public class GuiMain {
         cardPanel.add(tabPanel, c);
         return cardPanel;
     }
-    private JPanel cardPanel2Init() {
+    private JPanel cardPanel2Init(String nickname) {
         JPanel cardPanel = new JPanel(new BorderLayout());
-        JToolBar jtb = new JToolBar("Capabilities");
+        JToolBar jtb = new JToolBar("Функции");
         JButton buttonNewOwnWord = new JButton("Добавить слово");
         jtb.add(buttonNewOwnWord);
-        JButton buttonTraining = new JButton("Тренировка");
+        JButton buttonTraining = new JButton("Показать словарь");
         jtb.add(buttonTraining);
         cardPanel.add(jtb, BorderLayout.NORTH);
+
+        JPanel jpShowVocab = new JPanel(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 0;
+        JTable tableVocal = new JTable(new WordsTableModel(entireSessionVocabularity));
+        JScrollPane jsp = new JScrollPane(tableVocal);
+        jsp.setPreferredSize(new Dimension(240, 80));
+        jpShowVocab.add(jsp, c);
+
+        cardPanel.add(jpShowVocab, BorderLayout.CENTER);
         return cardPanel;
     }
     GuiMain() {
@@ -236,7 +252,7 @@ public class GuiMain {
 
         mainPanel = new JPanel(new CardLayout());
         mainPanel.add(cardPanel1Init(), AUTHORIZATION);
-        mainPanel.add(cardPanel2Init(), SMTHANOTHER);
+        //mainPanel.add(cardPanel2Init(), SMTHANOTHER);
         jfrm.add(mainPanel);
         jfrm.setLocationRelativeTo(null);
         jfrm.setVisible(true);
