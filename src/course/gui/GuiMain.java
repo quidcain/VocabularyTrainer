@@ -1,7 +1,6 @@
 package course.gui;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -24,10 +23,10 @@ public class GuiMain {
 
     private Database db;
     private HashMap<String, String> accounts;
-    ArrayList<WordsPair> entireSessionVocabularity;
+    //ArrayList<WordsPair> entireSessionVocabularity;
+    private HashMap<String, String> entireSessionVocabularity;
     private JPanel loginInit(JTextFieldLimit nickLimit,JTextFieldLimit passLimit) {
         JPanel jpLogin = new JPanel(new GridBagLayout());
-
         JLabel labelNick = new JLabel("Ваш никнейм:");
         JTextField textFieldNick = new JTextField();
         textFieldNick.setPreferredSize(new Dimension(220, 20));
@@ -79,13 +78,13 @@ public class GuiMain {
                 }
                 String actualPass = accounts.get(nickname);
                 if (actualPass == null)
-                    labelLog.setText("There is no such user in database");
+                    labelLog.setText("Такого пользователя не существует");
                 else if (!actualPass.equals(password))
-                    labelLog.setText("Incorrect password");
+                    labelLog.setText("Неправильный пароль");
                 else {
                     buttonLogin.setEnabled(false);
                     labelLog.setForeground(Color.green);
-                    labelLog.setText("Successfully logined!");
+                    labelLog.setText("Успех!");
                     entireSessionVocabularity = db.getVocabulatiry(nickname);
                     mainPanel.add(cardPanel2Init(nickname), SMTHANOTHER);
                     new Thread(new Runnable() {
@@ -200,7 +199,7 @@ public class GuiMain {
         return jpSignup;
     }
     private JPanel cardPanel1Init() {
-        JPanel cardPanel = new JPanel(new GridBagLayout());
+        JPanel upperPanel = new JPanel(new GridBagLayout());
         JTabbedPane tabPanel = new JTabbedPane();
         JTextFieldLimit nickLimit = new JTextFieldLimit(20);
         JTextFieldLimit passLimit = new JTextFieldLimit(20);
@@ -212,29 +211,110 @@ public class GuiMain {
         c.gridx = 0;
         c.gridy = 0;
         c.ipadx = 40;
-        cardPanel.add(tabPanel, c);
-        return cardPanel;
+        upperPanel.add(tabPanel, c);
+        return upperPanel;
     }
     private JPanel cardPanel2Init(String nickname) {
-        JPanel cardPanel = new JPanel(new BorderLayout());
+        JPanel upperPanel = new JPanel(new BorderLayout());
         JToolBar jtb = new JToolBar("Функции");
         JButton buttonNewOwnWord = new JButton("Добавить слово");
-        jtb.add(buttonNewOwnWord);
         JButton buttonTraining = new JButton("Показать словарь");
-        jtb.add(buttonTraining);
-        cardPanel.add(jtb, BorderLayout.NORTH);
 
-        JPanel jpShowVocab = new JPanel(new GridBagLayout());
+        JPanel innerPannel = new JPanel(new CardLayout());
+
+        JPanel jpVocab = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.gridx = 0;
         c.gridy = 0;
-        JTable tableVocal = new JTable(new WordsTableModel(entireSessionVocabularity));
+        WordsTableModel tableModel = new WordsTableModel(entireSessionVocabularity);
+        JTable tableVocal = new JTable(tableModel);
         JScrollPane jsp = new JScrollPane(tableVocal);
-        jsp.setPreferredSize(new Dimension(240, 80));
-        jpShowVocab.add(jsp, c);
+        jsp.setPreferredSize(new Dimension(240, 160));
+        jpVocab.add(jsp, c);
 
-        cardPanel.add(jpShowVocab, BorderLayout.CENTER);
-        return cardPanel;
+        JPanel jpNewWord = new JPanel(new GridBagLayout());
+        JLabel labelEng = new JLabel("Слово на английском:");
+        JTextField textFieldEng = new JTextField();
+        textFieldEng.setPreferredSize(new Dimension(220, 20));
+        textFieldEng.setDocument(new JTextFieldLimit(20));
+        JLabel labelRus = new JLabel("Его перевод:");
+        JTextField textFieldRus = new JTextField();
+        textFieldRus.setPreferredSize(new Dimension(220, 20));
+        textFieldRus.setDocument(new JTextFieldLimit(20));
+        JButton buttonAdd = new JButton("Добавить");
+        JLabel labelLog = new JLabel();
+        labelLog.setForeground(Color.red);
+        buttonAdd.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (textFieldEng.getText().equals("") || textFieldRus.getText().equals("")) {
+                    labelLog.setText("Поля не могут быть пустыми");
+                }
+                else if(entireSessionVocabularity.containsKey(textFieldEng.getText())) {
+                    labelLog.setText("Слово уже есть в словаре!");
+                }
+                else {
+                    labelLog.setForeground(Color.green);
+                    labelLog.setText("Добавлено");
+                    entireSessionVocabularity.put(textFieldEng.getText(), textFieldRus.getText());
+                    tableModel.addRow(new WordsPair(textFieldEng.getText(), textFieldRus.getText()));
+                }
+                new Thread(new Runnable() {
+                    @Override
+                    public void run(){
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e1) {
+                            e1.printStackTrace();
+                        }
+                        labelLog.setForeground(Color.red);
+                        labelLog.setText("");
+                    }
+                }).start();
+
+            }
+        });
+        c.gridx = 0;
+        c.gridy = 0;
+        c.anchor = GridBagConstraints.LINE_START;
+        c.insets = new Insets(5,0,5,0);
+        jpNewWord.add(labelEng, c);
+        c.gridy = 1;
+        c.gridwidth = 2;
+        jpNewWord.add(textFieldEng,c);
+        c.insets = new Insets(10,0,5,0);
+        c.gridy = 2;
+        c.gridwidth = 1;
+        jpNewWord.add(labelRus,c);
+        c.insets = new Insets(5,0,5,0);
+        c.gridy = 3;
+        c.gridwidth = 2;
+        jpNewWord.add(textFieldRus,c);
+        c.insets = new Insets(10,0,5,0);
+        c.gridy = 4;
+        c.gridwidth = 1;
+        jpNewWord.add(buttonAdd,c);
+        c.gridy = 5;
+        c.gridwidth = 3;
+        c.weighty = 1;
+        jpNewWord.add(labelLog,c);
+
+        innerPannel.add(jpVocab, buttonTraining.getActionCommand());
+        innerPannel.add(jpNewWord, buttonNewOwnWord.getActionCommand());
+        class ToolBarInteract implements ActionListener {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                CardLayout cl = (CardLayout)(innerPannel.getLayout());
+                cl.show(innerPannel, e.getActionCommand());
+            }
+        }
+        jtb.add(buttonNewOwnWord);
+        jtb.add(buttonTraining);
+        upperPanel.add(jtb, BorderLayout.NORTH);
+        upperPanel.add(innerPannel, BorderLayout.CENTER);
+        buttonNewOwnWord.addActionListener(new ToolBarInteract());
+        buttonTraining.addActionListener(new ToolBarInteract());
+        return upperPanel;
     }
     GuiMain() {
         try {
@@ -252,7 +332,6 @@ public class GuiMain {
 
         mainPanel = new JPanel(new CardLayout());
         mainPanel.add(cardPanel1Init(), AUTHORIZATION);
-        //mainPanel.add(cardPanel2Init(), SMTHANOTHER);
         jfrm.add(mainPanel);
         jfrm.setLocationRelativeTo(null);
         jfrm.setVisible(true);

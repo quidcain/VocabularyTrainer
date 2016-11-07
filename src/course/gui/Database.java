@@ -59,14 +59,25 @@ public class Database {
             return 0;
         }
     }
-    public ArrayList<WordsPair> getVocabulatiry(String nickname){
-        ArrayList<WordsPair> entireSessionVocabularity = new ArrayList<>(getUserWordsNumber(nickname));
+    public HashMap<String, String> getVocabulatiry(String nickname){
+        /*ArrayList<WordsPair> entireSessionVocabularity = new ArrayList<>(getUserWordsNumber(nickname));
         try (Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery("SELECT * FROM " + nickname + " ;")) {
             while (resultSet.next()) {
                 WordsPair wordsPair = new WordsPair(resultSet.getString("eng"), resultSet.getString("rus"));
                 entireSessionVocabularity.add(wordsPair);
             }
+            return entireSessionVocabularity;
+        } catch (SQLException e) {
+            //it can't happen
+            System.out.println("Can't get connection: " + e.getMessage());
+            return null;
+        }*/
+        HashMap<String, String> entireSessionVocabularity = new HashMap<>();
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery("SELECT * FROM " + nickname + " ;")) {
+            while (resultSet.next())
+                entireSessionVocabularity.put(resultSet.getString("eng"), resultSet.getString("rus"));
             return entireSessionVocabularity;
         } catch (SQLException e) {
             //it can't happen
