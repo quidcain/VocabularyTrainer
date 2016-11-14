@@ -1,4 +1,4 @@
-package course.gui;
+package gui;
 
 /**
  * Created by user on 05.11.2016.

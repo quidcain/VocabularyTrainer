@@ -1,7 +1,6 @@
-package course.gui;
+package gui;
 
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 /**

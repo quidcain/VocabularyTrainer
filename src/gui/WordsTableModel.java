@@ -1,4 +1,4 @@
-package course.gui;
+package gui;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
