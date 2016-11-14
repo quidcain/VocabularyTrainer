@@ -1,11 +1,12 @@
 package course.gui;
 
+import javafx.scene.control.SelectionMode;
+
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
+import java.awt.event.*;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -23,7 +24,6 @@ public class GuiMain {
 
     private Database db;
     private HashMap<String, String> accounts;
-    //ArrayList<WordsPair> entireSessionVocabularity;
     private HashMap<String, String> entireSessionVocabularity;
     private JPanel loginInit(JTextFieldLimit nickLimit,JTextFieldLimit passLimit) {
         JPanel jpLogin = new JPanel(new GridBagLayout());
@@ -121,7 +121,7 @@ public class GuiMain {
         JTextField textFieldRepeatPass = new JTextField();
         textFieldRepeatPass.setPreferredSize(new Dimension(220, 20));
         textFieldRepeatPass.setDocument(new JTextFieldLimit(20));
-        JButton buttonLogin = new JButton("Зарегистрироваться");
+        JButton buttonSignup = new JButton("Зарегистрироваться");
         JLabel labelLog = new JLabel();
         labelLog.setForeground(Color.green);
 
@@ -152,13 +152,13 @@ public class GuiMain {
         jpSignup.add(textFieldRepeatPass,c);
         c.insets = new Insets(10,0,10,0);
         c.gridy = 6;
-        jpSignup.add(buttonLogin,c);
+        jpSignup.add(buttonSignup,c);
         c.gridy = 7;
         c.weighty = 1;
         c.insets = new Insets(0,0,10,0);
         jpSignup.add(labelLog,c);
 
-        buttonLogin.addActionListener(new ActionListener() {
+        buttonSignup.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String nickname = textFieldNick.getText();
@@ -166,10 +166,6 @@ public class GuiMain {
                 String repeatedPassword = textFieldRepeatPass.getText();
                 labelLog.setForeground(Color.red);
                 labelLog.setText("");
-                /*if (nickname.equals("") || password.equals("")) {
-                    labelLog.setText("<html>Аккаунт успешно создан!</html>");
-                    return;
-                }*/
                 if (nickname.equals("") || password.equals("")) {
                     labelLog.setText("<html>Пароль и логин не могут быть пусты!</html>");
                     return;
@@ -181,24 +177,15 @@ public class GuiMain {
                     return;
                 }else {
                     accounts.put(nickname, password);
-                    try (PreparedStatement statement = db.getConnection().prepareStatement("INSERT INTO accounts (nickname, password) VALUES (?,?);")) {
-                        statement.setString(1, nickname);
-                        statement.setString(2, password);
-                        int changedRows = statement.executeUpdate();
-                        if (changedRows > 0) {
-                            labelLog.setForeground(Color.green);
-                            labelLog.setText("Successfully sign up!");
-                        } else
-                            labelLog.setText("Some troubles...");
-                    } catch (SQLException sqlEx) {
-                        System.out.println(sqlEx.getMessage());
-                    }
+                    db.createNewUser(nickname, password);
+                    labelLog.setForeground(Color.green);
+                    labelLog.setText("Успешно зарегестрирован!");
                 }
             }
         });
         return jpSignup;
     }
-    private JPanel cardPanel1Init() {
+    private JPanel authorizationPanelInit() {
         JPanel upperPanel = new JPanel(new GridBagLayout());
         JTabbedPane tabPanel = new JTabbedPane();
         JTextFieldLimit nickLimit = new JTextFieldLimit(20);
@@ -216,91 +203,116 @@ public class GuiMain {
     }
     private JPanel cardPanel2Init(String nickname) {
         JPanel upperPanel = new JPanel(new BorderLayout());
+
         JToolBar jtb = new JToolBar("Функции");
         JButton buttonNewOwnWord = new JButton("Добавить слово");
         JButton buttonTraining = new JButton("Показать словарь");
 
         JPanel innerPannel = new JPanel(new CardLayout());
 
-        JPanel jpVocab = new JPanel(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-        c.gridx = 0;
-        c.gridy = 0;
+        // it's here because it interacts with other panel
         WordsTableModel tableModel = new WordsTableModel(entireSessionVocabularity);
-        JTable tableVocal = new JTable(tableModel);
-        JScrollPane jsp = new JScrollPane(tableVocal);
+
+        //
+        /*WordsTableModel tableTrainingModel = new WordsTableModel(entireSessionVocabularity);
+        JTable tableToTraining = new JTable(tableTrainingModel);
+        jsp = new JScrollPane(tableToTraining);
         jsp.setPreferredSize(new Dimension(240, 160));
-        jpVocab.add(jsp, c);
-
-        JPanel jpNewWord = new JPanel(new GridBagLayout());
-        JLabel labelEng = new JLabel("Слово на английском:");
-        JTextField textFieldEng = new JTextField();
-        textFieldEng.setPreferredSize(new Dimension(220, 20));
-        textFieldEng.setDocument(new JTextFieldLimit(20));
-        JLabel labelRus = new JLabel("Его перевод:");
-        JTextField textFieldRus = new JTextField();
-        textFieldRus.setPreferredSize(new Dimension(220, 20));
-        textFieldRus.setDocument(new JTextFieldLimit(20));
-        JButton buttonAdd = new JButton("Добавить");
-        JLabel labelLog = new JLabel();
-        labelLog.setForeground(Color.red);
-        buttonAdd.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (textFieldEng.getText().equals("") || textFieldRus.getText().equals("")) {
-                    labelLog.setText("Поля не могут быть пустыми");
-                }
-                else if(entireSessionVocabularity.containsKey(textFieldEng.getText())) {
-                    labelLog.setText("Слово уже есть в словаре!");
-                }
-                else {
-                    labelLog.setForeground(Color.green);
-                    labelLog.setText("Добавлено");
-                    entireSessionVocabularity.put(textFieldEng.getText(), textFieldRus.getText());
-                    tableModel.addRow(new WordsPair(textFieldEng.getText(), textFieldRus.getText()));
-                }
-                new Thread(new Runnable() {
-                    @Override
-                    public void run(){
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e1) {
-                            e1.printStackTrace();
-                        }
-                        labelLog.setForeground(Color.red);
-                        labelLog.setText("");
-                    }
-                }).start();
-
-            }
-        });
-        c.gridx = 0;
+        c.gridx = 1;
         c.gridy = 0;
-        c.anchor = GridBagConstraints.LINE_START;
-        c.insets = new Insets(5,0,5,0);
-        jpNewWord.add(labelEng, c);
-        c.gridy = 1;
-        c.gridwidth = 2;
-        jpNewWord.add(textFieldEng,c);
-        c.insets = new Insets(10,0,5,0);
-        c.gridy = 2;
-        c.gridwidth = 1;
-        jpNewWord.add(labelRus,c);
-        c.insets = new Insets(5,0,5,0);
-        c.gridy = 3;
-        c.gridwidth = 2;
-        jpNewWord.add(textFieldRus,c);
-        c.insets = new Insets(10,0,5,0);
-        c.gridy = 4;
-        c.gridwidth = 1;
-        jpNewWord.add(buttonAdd,c);
-        c.gridy = 5;
-        c.gridwidth = 3;
-        c.weighty = 1;
-        jpNewWord.add(labelLog,c);
+        jpVocab.add(jsp, c);*/
+        //
 
+        JPanel jpVocab = new JPanel(new GridBagLayout()) {
+            {
+                JTable tableVocal = new JTable(tableModel);
+                tableVocal.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+                tableVocal.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseReleased(MouseEvent e) {
+                        if (tableVocal.getSelectedRowCount() > 4)
+                            tableVocal.getSelectionModel().removeIndexInterval(tableVocal.getSelectedRow(), tableVocal.getSelectedRow());
+                        super.mouseReleased(e);
+                    }
+                });
+                JScrollPane jsp = new JScrollPane(tableVocal);
+                jsp.setPreferredSize(new Dimension(240, 160));
+                GridBagConstraints c = new GridBagConstraints();
+                c.gridx = 0;
+                c.gridy = 0;
+                add(jsp, c);
+            }
+        };
+        JPanel jpNewWord = new JPanel(new GridBagLayout()) {
+            {
+                JLabel labelEng = new JLabel("Слово на английском:");
+                JTextField textFieldEng = new JTextField();
+                textFieldEng.setPreferredSize(new Dimension(220, 20));
+                textFieldEng.setDocument(new JTextFieldLimit(20));
+                JLabel labelRus = new JLabel("Его перевод:");
+                JTextField textFieldRus = new JTextField();
+                textFieldRus.setPreferredSize(new Dimension(220, 20));
+                textFieldRus.setDocument(new JTextFieldLimit(20));
+                JButton buttonAdd = new JButton("Добавить");
+                JLabel labelLog = new JLabel();
+                labelLog.setForeground(Color.red);
+                buttonAdd.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        if (textFieldEng.getText().equals("") || textFieldRus.getText().equals("")) {
+                            labelLog.setText("Поля не могут быть пустыми");
+                        } else if (entireSessionVocabularity.containsKey(textFieldEng.getText())) {
+                            labelLog.setText("Слово уже есть в словаре!");
+                        } else {
+                            labelLog.setForeground(Color.green);
+                            labelLog.setText("Добавлено");
+                            entireSessionVocabularity.put(textFieldEng.getText(), textFieldRus.getText());
+                            tableModel.addRow(new WordsPair(textFieldEng.getText(), textFieldRus.getText()));
+                        }
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    Thread.sleep(1000);
+                                } catch (InterruptedException e1) {
+                                    e1.printStackTrace();
+                                }
+                                labelLog.setForeground(Color.red);
+                                labelLog.setText("");
+                            }
+                        }).start();
+                    }
+                });
+                GridBagConstraints c = new GridBagConstraints();
+                c.gridx = 0;
+                c.gridy = 0;
+                c.anchor = GridBagConstraints.LINE_START;
+                c.insets = new Insets(5, 0, 5, 0);
+                add(labelEng, c);
+                c.gridy = 1;
+                c.gridwidth = 2;
+                add(textFieldEng, c);
+                c.insets = new Insets(10, 0, 5, 0);
+                c.gridy = 2;
+                c.gridwidth = 1;
+                add(labelRus, c);
+                c.insets = new Insets(5, 0, 5, 0);
+                c.gridy = 3;
+                c.gridwidth = 2;
+                add(textFieldRus, c);
+                c.insets = new Insets(10, 0, 5, 0);
+                c.gridy = 4;
+                c.gridwidth = 1;
+                add(buttonAdd, c);
+                c.gridy = 5;
+                c.gridwidth = 3;
+                c.weighty = 1;
+                add(labelLog, c);
+            }
+        };
         innerPannel.add(jpVocab, buttonTraining.getActionCommand());
         innerPannel.add(jpNewWord, buttonNewOwnWord.getActionCommand());
+
         class ToolBarInteract implements ActionListener {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -308,12 +320,13 @@ public class GuiMain {
                 cl.show(innerPannel, e.getActionCommand());
             }
         }
-        jtb.add(buttonNewOwnWord);
-        jtb.add(buttonTraining);
-        upperPanel.add(jtb, BorderLayout.NORTH);
-        upperPanel.add(innerPannel, BorderLayout.CENTER);
         buttonNewOwnWord.addActionListener(new ToolBarInteract());
         buttonTraining.addActionListener(new ToolBarInteract());
+        jtb.add(buttonNewOwnWord);
+        jtb.add(buttonTraining);
+
+        upperPanel.add(jtb, BorderLayout.NORTH);
+        upperPanel.add(innerPannel, BorderLayout.CENTER);
         return upperPanel;
     }
     GuiMain() {
@@ -331,7 +344,8 @@ public class GuiMain {
         jfrm.setMinimumSize(new Dimension(290, 330));
 
         mainPanel = new JPanel(new CardLayout());
-        mainPanel.add(cardPanel1Init(), AUTHORIZATION);
+        mainPanel.add(authorizationPanelInit(), AUTHORIZATION);
+
         jfrm.add(mainPanel);
         jfrm.setLocationRelativeTo(null);
         jfrm.setVisible(true);

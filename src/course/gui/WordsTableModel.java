@@ -13,7 +13,7 @@ public class WordsTableModel extends AbstractTableModel{
     private ArrayList<WordsPair> entireSessionVocabularity;
     WordsTableModel(HashMap<String, String> entireSessionVocabularity) {
         super();
-        this.entireSessionVocabularity =  new ArrayList<>();
+        this.entireSessionVocabularity = new ArrayList<>();
         for( Map.Entry<String, String> entry : entireSessionVocabularity.entrySet() ) {
             WordsPair pair  = new WordsPair(entry.getKey(), entry.getValue());
             this.entireSessionVocabularity.add(pair);
@@ -31,7 +31,6 @@ public class WordsTableModel extends AbstractTableModel{
     public int getColumnCount() {
         return 2;
     }
-
     @Override
     public String getValueAt(int rowIndex, int columnIndex) {
         if (columnIndex == 0) {

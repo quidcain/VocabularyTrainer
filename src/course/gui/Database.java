@@ -41,12 +41,25 @@ public class Database {
             return null;
         }
     }
-    public void createUserTable(String nickname){
+    private void addNewUser(String nickname, String password) {
+        try (PreparedStatement statement = connection.prepareStatement("INSERT INTO accounts (nickname, password) VALUES (?,?);")) {
+            statement.setString(1, nickname);
+            statement.setString(2, password);
+            statement.executeUpdate();
+        } catch (SQLException sqlEx) {
+            System.out.println(sqlEx.getMessage());
+        }
+    }
+    private void createUserTable(String nickname){
         try (PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + nickname + " (eng VARCHAR(255), rus VARCHAR(255));")) {
             statement.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+    }
+    public void createNewUser(String nickname, String password) {
+        addNewUser(nickname, password);
+        createUserTable(nickname);
     }
     private int getUserWordsNumber(String nickname) {
         try (Statement statement = connection.createStatement();
@@ -60,19 +73,6 @@ public class Database {
         }
     }
     public HashMap<String, String> getVocabulatiry(String nickname){
-        /*ArrayList<WordsPair> entireSessionVocabularity = new ArrayList<>(getUserWordsNumber(nickname));
-        try (Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery("SELECT * FROM " + nickname + " ;")) {
-            while (resultSet.next()) {
-                WordsPair wordsPair = new WordsPair(resultSet.getString("eng"), resultSet.getString("rus"));
-                entireSessionVocabularity.add(wordsPair);
-            }
-            return entireSessionVocabularity;
-        } catch (SQLException e) {
-            //it can't happen
-            System.out.println("Can't get connection: " + e.getMessage());
-            return null;
-        }*/
         HashMap<String, String> entireSessionVocabularity = new HashMap<>();
         try (Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery("SELECT * FROM " + nickname + " ;")) {
@@ -85,5 +85,12 @@ public class Database {
             return null;
         }
     }
-
+    public void deleteAccount(String account) {
+        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM accounts where nickname=?")) {
+            statement.setString(1, account);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
 }
