@@ -61,17 +61,6 @@ public class Database {
         addNewUser(nickname, password);
         createUserTable(nickname);
     }
-    private int getUserWordsNumber(String nickname) {
-        try (Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) FROM " + nickname + " ACCOUNTS;")) {
-            resultSet.next();
-            return resultSet.getInt(1);
-        } catch (SQLException e) {
-            //it can't happen
-            System.out.println("Can't get connection: " + e.getMessage());
-            return 0;
-        }
-    }
     public HashMap<String, String> getVocabulatiry(String nickname){
         HashMap<String, String> entireSessionVocabularity = new HashMap<>();
         try (Statement statement = connection.createStatement();
