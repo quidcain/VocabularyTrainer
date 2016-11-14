@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * Created by user on 31.10.2016.
@@ -207,13 +208,13 @@ public class GuiMain {
         JPanel innerPannel = new JPanel(new CardLayout());
 
         // it's here because it interacts with other panel
-        WordsTableModel entireTableModel = new WordsTableModel(entireSessionVocabularity);
+        WordsTableModel vocabTableModel = new WordsTableModel(entireSessionVocabularity);
 
         JPanel jpVocab = new JPanel(new GridBagLayout()) {
             {
-                JTable tableVocab = new JTable(entireTableModel);
-                tableVocab.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-                JScrollPane jsp = new JScrollPane(tableVocab);
+                JTable vocabTable = new JTable(vocabTableModel);
+                vocabTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+                JScrollPane jsp = new JScrollPane(vocabTable);
                 jsp.setPreferredSize(new Dimension(240, 160));
                 GridBagConstraints c = new GridBagConstraints();
                 c.gridx = 0;
@@ -233,9 +234,21 @@ public class GuiMain {
                 c.gridy = 1;
                 c.insets = new Insets(0,10,0,10);
                 add(buttonLeft, c);
-                WordsTableModel trainingTableModel = new WordsTableModel();
-                JTable tableToTraining = new JTable(trainingTableModel);
-                JScrollPane jsp2 = new JScrollPane(tableToTraining);
+                class CheckedWordsTableModel extends WordsTableModel {
+                    HashSet<WordsPair> set = new HashSet<>();
+                    public boolean contains(WordsPair wordsPair) {
+                        return set.contains(wordsPair);
+                    }
+                    public void add(WordsPair wordsPair) {
+                        set.add(wordsPair);
+                    }
+                    public void remove(WordsPair wordsPair) {
+                        set.remove(wordsPair);
+                    }
+                };
+                CheckedWordsTableModel trainingTableModel = new CheckedWordsTableModel();
+                JTable trainingTable = new JTable(trainingTableModel);
+                JScrollPane jsp2 = new JScrollPane(trainingTable);
                 jsp2.setPreferredSize(new Dimension(240, 160));
                 c.gridx = 2;
                 c.gridy = 0;
@@ -245,17 +258,28 @@ public class GuiMain {
                 buttonRight.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        int selectedRow = tableVocab.getSelectedRow();
-                        if (selectedRow != -1 && tableToTraining.getRowCount() < 5)
-                            trainingTableModel.addRow(entireTableModel.getRow(selectedRow));
+                        int selectedRow = vocabTable.getSelectedRow();
+                        if (selectedRow != -1 && trainingTableModel.getRowCount() < 5
+                                && !trainingTableModel.contains(vocabTableModel.getRow(selectedRow))) {
+                            trainingTableModel.add(vocabTableModel.getRow(selectedRow));
+                            trainingTableModel.addRow(vocabTableModel.getRow(selectedRow));
+                            int nextSelect = (selectedRow < vocabTableModel.getRowCount() - 1 ? selectedRow + 1 : 0);
+                            vocabTable.setRowSelectionInterval(nextSelect, nextSelect);
+                        }
                     }
                 });
                 buttonLeft.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        int selectedRow = tableToTraining.getSelectedRow();
-                        if (selectedRow != -1)
+                        int selectedRow = trainingTable.getSelectedRow();
+                        if (selectedRow != -1) {
+                            trainingTableModel.remove(trainingTableModel.getRow(selectedRow));
                             trainingTableModel.removeRow(selectedRow);
+                            if (trainingTableModel.getRowCount() != 0) {
+                                int nextSelect = (selectedRow == trainingTableModel.getRowCount() ? selectedRow - 1 : selectedRow);
+                                trainingTable.setRowSelectionInterval(nextSelect, nextSelect);
+                            }
+                        }
                     }
                 });
                 //
@@ -287,7 +311,7 @@ public class GuiMain {
                             String eng = textFieldEng.getText();
                             String rus = textFieldRus.getText();
                             entireSessionVocabularity.put(eng, rus);
-                            entireTableModel.addRow(new WordsPair(eng, rus));
+                            vocabTableModel.addRow(new WordsPair(eng, rus));
                             db.addWord(nickname, eng, rus);
                         }
                         new Thread(new Runnable() {
