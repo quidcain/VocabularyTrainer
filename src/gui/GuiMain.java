@@ -16,6 +16,8 @@ public class GuiMain {
     private String AUTHORIZATION = "Авторизация";
     private String SMTHANOTHER = "Что-то другое";
 
+    private String nickname;
+
     private Database db;
     private HashMap<String, String> accounts;
     private HashMap<String, String> entireSessionVocabularity;
@@ -62,7 +64,7 @@ public class GuiMain {
         buttonLogin.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String nickname = textFieldNick.getText();
+                nickname = textFieldNick.getText();
                 String password = textFieldPass.getText();
                 labelLog.setForeground(Color.red);
                 labelLog.setText("");
@@ -221,14 +223,14 @@ public class GuiMain {
             {
                 JTable tableVocal = new JTable(tableModel);
                 tableVocal.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-                tableVocal.addMouseListener(new MouseAdapter() {
+                /*tableVocal.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseReleased(MouseEvent e) {
                         if (tableVocal.getSelectedRowCount() > 4)
                             tableVocal.getSelectionModel().removeIndexInterval(tableVocal.getSelectedRow(), tableVocal.getSelectedRow());
                         super.mouseReleased(e);
                     }
-                });
+                });*/
                 JScrollPane jsp = new JScrollPane(tableVocal);
                 jsp.setPreferredSize(new Dimension(240, 160));
                 GridBagConstraints c = new GridBagConstraints();
@@ -260,8 +262,11 @@ public class GuiMain {
                         } else {
                             labelLog.setForeground(Color.green);
                             labelLog.setText("Добавлено");
-                            entireSessionVocabularity.put(textFieldEng.getText(), textFieldRus.getText());
-                            tableModel.addRow(new WordsPair(textFieldEng.getText(), textFieldRus.getText()));
+                            String eng = textFieldEng.getText();
+                            String rus = textFieldRus.getText();
+                            entireSessionVocabularity.put(eng, rus);
+                            tableModel.addRow(new WordsPair(eng, rus));
+                            db.addWord(nickname, eng, rus);
                         }
                         new Thread(new Runnable() {
                             @Override

@@ -81,4 +81,28 @@ public class Database {
             System.out.println(e.getMessage());
         }
     }
+    public void addWord(String nickname, String eng, String rus) {
+        try (PreparedStatement statement = connection.prepareStatement("INSERT INTO " + nickname + " (eng, rus) VALUES (?,?);")) {
+            statement.setString(1, eng);
+            statement.setString(2, rus);
+            statement.executeUpdate();
+        } catch (SQLException sqlEx) {
+            System.out.println(sqlEx.getMessage());
+        }
+    }
+    public void deleteWord() {}
+    /*private void deleteUserVocab(String nickname) {
+        try (PreparedStatement statement = connection.prepareStatement("TRUNCATE TABLE " + nickname)) {
+            //statement.setString(1, nickname);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    private void setUserVocab(String nickname, HashMap<String, String> entireSessionVocabularity) {
+    }
+    public void updateUserVocab(String nickname, HashMap<String, String> entireSessionVocabularity) {
+        deleteUserVocab(nickname);
+        setUserVocab(nickname, entireSessionVocabularity);
+    }*/
 }
