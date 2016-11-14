@@ -207,36 +207,58 @@ public class GuiMain {
         JPanel innerPannel = new JPanel(new CardLayout());
 
         // it's here because it interacts with other panel
-        WordsTableModel tableModel = new WordsTableModel(entireSessionVocabularity);
-
-        //
-        /*WordsTableModel tableTrainingModel = new WordsTableModel(entireSessionVocabularity);
-        JTable tableToTraining = new JTable(tableTrainingModel);
-        jsp = new JScrollPane(tableToTraining);
-        jsp.setPreferredSize(new Dimension(240, 160));
-        c.gridx = 1;
-        c.gridy = 0;
-        jpVocab.add(jsp, c);*/
-        //
+        WordsTableModel entireTableModel = new WordsTableModel(entireSessionVocabularity);
 
         JPanel jpVocab = new JPanel(new GridBagLayout()) {
             {
-                JTable tableVocal = new JTable(tableModel);
-                tableVocal.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-                /*tableVocal.addMouseListener(new MouseAdapter() {
-                    @Override
-                    public void mouseReleased(MouseEvent e) {
-                        if (tableVocal.getSelectedRowCount() > 4)
-                            tableVocal.getSelectionModel().removeIndexInterval(tableVocal.getSelectedRow(), tableVocal.getSelectedRow());
-                        super.mouseReleased(e);
-                    }
-                });*/
-                JScrollPane jsp = new JScrollPane(tableVocal);
+                JTable tableVocab = new JTable(entireTableModel);
+                tableVocab.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+                JScrollPane jsp = new JScrollPane(tableVocab);
                 jsp.setPreferredSize(new Dimension(240, 160));
                 GridBagConstraints c = new GridBagConstraints();
                 c.gridx = 0;
                 c.gridy = 0;
+                c.gridheight = 4;
                 add(jsp, c);
+
+                //
+                JButton buttonRight = new JButton("-->");
+                c.gridx = 1;
+                c.gridy = 0;
+                c.insets = new Insets(40,10,0,10);
+                c.gridheight = 1;
+                add(buttonRight, c);
+                JButton buttonLeft = new JButton("<--");
+                c.gridx = 1;
+                c.gridy = 1;
+                c.insets = new Insets(0,10,0,10);
+                add(buttonLeft, c);
+                WordsTableModel trainingTableModel = new WordsTableModel();
+                JTable tableToTraining = new JTable(trainingTableModel);
+                JScrollPane jsp2 = new JScrollPane(tableToTraining);
+                jsp2.setPreferredSize(new Dimension(240, 160));
+                c.gridx = 2;
+                c.gridy = 0;
+                c.gridheight = 4;
+                c.insets = new Insets(0,0,0,0);
+                add(jsp2, c);
+                buttonRight.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        int selectedRow = tableVocab.getSelectedRow();
+                        if (selectedRow != -1 && tableToTraining.getRowCount() < 5)
+                            trainingTableModel.addRow(entireTableModel.getRow(selectedRow));
+                    }
+                });
+                buttonLeft.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        int selectedRow = tableToTraining.getSelectedRow();
+                        if (selectedRow != -1)
+                            trainingTableModel.removeRow(selectedRow);
+                    }
+                });
+                //
             }
         };
         JPanel jpNewWord = new JPanel(new GridBagLayout()) {
@@ -265,7 +287,7 @@ public class GuiMain {
                             String eng = textFieldEng.getText();
                             String rus = textFieldRus.getText();
                             entireSessionVocabularity.put(eng, rus);
-                            tableModel.addRow(new WordsPair(eng, rus));
+                            entireTableModel.addRow(new WordsPair(eng, rus));
                             db.addWord(nickname, eng, rus);
                         }
                         new Thread(new Runnable() {

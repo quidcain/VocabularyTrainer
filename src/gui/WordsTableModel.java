@@ -10,18 +10,21 @@ import java.util.Map;
  */
 public class WordsTableModel extends AbstractTableModel{
     private String[] columnNames = { "Английский", "Русский" };
-    private ArrayList<WordsPair> entireSessionVocabularity;
+    private ArrayList<WordsPair> cells;
     WordsTableModel(HashMap<String, String> entireSessionVocabularity) {
         super();
-        this.entireSessionVocabularity = new ArrayList<>();
+        cells = new ArrayList<>();
         for( Map.Entry<String, String> entry : entireSessionVocabularity.entrySet() ) {
             WordsPair pair  = new WordsPair(entry.getKey(), entry.getValue());
-            this.entireSessionVocabularity.add(pair);
+            cells.add(pair);
         }
+    }
+    WordsTableModel() {
+        cells = new ArrayList<>(5);
     }
     @Override
     public int getRowCount() {
-        return entireSessionVocabularity.size();
+        return cells.size();
     }
     @Override
     public String getColumnName(int columnIndex) {
@@ -34,12 +37,19 @@ public class WordsTableModel extends AbstractTableModel{
     @Override
     public String getValueAt(int rowIndex, int columnIndex) {
         if (columnIndex == 0) {
-            return entireSessionVocabularity.get(rowIndex).eng;
+            return cells.get(rowIndex).eng;
         }
-        return entireSessionVocabularity.get(rowIndex).rus;
+        return cells.get(rowIndex).rus;
     }
     public void addRow(WordsPair pair) {
-        entireSessionVocabularity.add(pair);
+        cells.add(pair);
+        fireTableDataChanged();
+    }
+    public WordsPair getRow(int index) {
+        return cells.get(index);
+    }
+    public void removeRow(int index) {
+        cells.remove(index);
         fireTableDataChanged();
     }
 }
