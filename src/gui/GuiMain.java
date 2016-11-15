@@ -89,6 +89,8 @@ public class GuiMain {
                         public void run(){
                             try {
                                 Thread.sleep(1000);
+                                jfrm.setSize(690, 330);
+                                jfrm.setMinimumSize(new Dimension(690, 330));
                             } catch (InterruptedException e1) {
                                 e1.printStackTrace();
                             }
@@ -199,13 +201,14 @@ public class GuiMain {
         return upperPanel;
     }
     private JPanel cardPanel2Init(String nickname) {
-        JPanel upperPanel = new JPanel(new BorderLayout());
+        JPanel upperPanel = new JPanel(new CardLayout());
+        JPanel menuPanel = new JPanel(new BorderLayout());
 
         JToolBar jtb = new JToolBar("Функции");
         JButton buttonNewOwnWord = new JButton("Добавить слово");
         JButton buttonTraining = new JButton("Показать словарь");
 
-        JPanel innerPannel = new JPanel(new CardLayout());
+        JPanel menuInnerPanel = new JPanel(new CardLayout());
 
         // it's here because it interacts with other panel
         WordsTableModel vocabTableModel = new WordsTableModel(entireSessionVocabularity);
@@ -222,7 +225,6 @@ public class GuiMain {
                 c.gridheight = 4;
                 add(jsp, c);
 
-                //
                 JButton buttonRight = new JButton("-->");
                 c.gridx = 1;
                 c.gridy = 0;
@@ -355,14 +357,14 @@ public class GuiMain {
                 add(labelLog, c);
             }
         };
-        innerPannel.add(jpVocab, buttonTraining.getActionCommand());
-        innerPannel.add(jpNewWord, buttonNewOwnWord.getActionCommand());
+        menuInnerPanel.add(jpVocab, buttonTraining.getActionCommand());
+        menuInnerPanel.add(jpNewWord, buttonNewOwnWord.getActionCommand());
 
         class ToolBarInteract implements ActionListener {
             @Override
             public void actionPerformed(ActionEvent e) {
-                CardLayout cl = (CardLayout)(innerPannel.getLayout());
-                cl.show(innerPannel, e.getActionCommand());
+                CardLayout cl = (CardLayout)(menuInnerPanel.getLayout());
+                cl.show(menuInnerPanel, e.getActionCommand());
             }
         }
         buttonNewOwnWord.addActionListener(new ToolBarInteract());
@@ -370,8 +372,9 @@ public class GuiMain {
         jtb.add(buttonNewOwnWord);
         jtb.add(buttonTraining);
 
-        upperPanel.add(jtb, BorderLayout.NORTH);
-        upperPanel.add(innerPannel, BorderLayout.CENTER);
+        menuPanel.add(jtb, BorderLayout.NORTH);
+        menuPanel.add(menuInnerPanel, BorderLayout.CENTER);
+        upperPanel.add(menuPanel,"меню");
         return upperPanel;
     }
     GuiMain() {
