@@ -7,7 +7,7 @@ import javax.swing.text.PlainDocument;
 /**
  * Created by user on 02.11.2016.
  */
-public class JTextFieldLimit extends PlainDocument{
+class JTextFieldLimit extends PlainDocument{
     private int limit;
 
     JTextFieldLimit(int limit) {

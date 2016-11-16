@@ -6,7 +6,7 @@ import java.util.HashMap;
 /**
  * Created by user on 03.11.2016.
  */
-public class Database {
+class Database {
     private static final String DB_URL = "jdbc:h2:./mainDb";
     private static final String LOGIN = "sa";
     private static final String PASSWORD = "";
@@ -90,19 +90,5 @@ public class Database {
             System.out.println(sqlEx.getMessage());
         }
     }
-    public void deleteWord() {}
-    /*private void deleteUserVocab(String nickname) {
-        try (PreparedStatement statement = connection.prepareStatement("TRUNCATE TABLE " + nickname)) {
-            //statement.setString(1, nickname);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-    }
-    private void setUserVocab(String nickname, HashMap<String, String> entireSessionVocabularity) {
-    }
-    public void updateUserVocab(String nickname, HashMap<String, String> entireSessionVocabularity) {
-        deleteUserVocab(nickname);
-        setUserVocab(nickname, entireSessionVocabularity);
-    }*/
+    //public void deleteWord() {}
 }

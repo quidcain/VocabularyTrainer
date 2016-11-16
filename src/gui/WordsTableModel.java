@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Created by user on 05.11.2016.
  */
-public class WordsTableModel extends AbstractTableModel{
+class WordsTableModel extends AbstractTableModel{
     private String[] columnNames = { "Английский", "Русский" };
     private ArrayList<WordsPair> cells;
     WordsTableModel(HashMap<String, String> entireSessionVocabularity) {
