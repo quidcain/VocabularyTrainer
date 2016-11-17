@@ -8,18 +8,28 @@ import java.util.Map;
 /**
  * Created by user on 05.11.2016.
  */
-class WordsTableModel extends AbstractTableModel{
+class TableModelWords extends AbstractTableModel{
     private String[] columnNames = { "Английский", "Русский" };
     private ArrayList<WordsPair> cells;
-    WordsTableModel(HashMap<String, String> entireSessionVocabularity) {
+    /*TableModelWords(HashMap<String, String> entireSessionVocabularity) {
         cells = new ArrayList<>();
         for( Map.Entry<String, String> entry : entireSessionVocabularity.entrySet() ) {
             WordsPair pair  = new WordsPair(entry.getKey(), entry.getValue());
             cells.add(pair);
         }
+    }*/
+    TableModelWords(int capacity) {
+        cells = new ArrayList<>(capacity);
     }
-    WordsTableModel() {
-        cells = new ArrayList<>(5);
+    TableModelWords() {
+        cells = new ArrayList<>();
+    }
+    public void setCells(HashMap<String, String> entireSessionVocabularity) {
+        cells.ensureCapacity(entireSessionVocabularity.size());
+        for( Map.Entry<String, String> entry : entireSessionVocabularity.entrySet() ) {
+            WordsPair pair  = new WordsPair(entry.getKey(), entry.getValue());
+            cells.add(pair);
+        }
     }
     @Override
     public int getRowCount() {

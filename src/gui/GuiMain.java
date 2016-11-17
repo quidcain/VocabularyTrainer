@@ -4,7 +4,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -14,11 +13,12 @@ import java.util.HashSet;
 public class GuiMain {
     private JFrame frame;
     private JPanel mainPanel;
-
+    private final int AMOUNT_OF_WORDS_FOR_TRAINING = 5;
     private String nickname;
     private Database db;
     private HashMap<String, String> accounts;
-    private HashMap<String, String> entireSessionVocabularity;
+    private HashMap<String, String> entireSessionVocabulary;
+    private TableModelWords tableModelVocabulary;
     private class AuthorizationPanel extends JPanel {
         AuthorizationPanel() {
             super(new GridBagLayout());
@@ -87,8 +87,8 @@ public class GuiMain {
                                         buttonLogin.setEnabled(false);
                                         labelLog.setForeground(Color.green);
                                         labelLog.setText("Успех!");
-                                        entireSessionVocabularity = db.getVocabulary(nickname);
-                                        mainPanel.add(new AfterAuthPanel(), "Smth another"); //Creates second part of GUI solely after login, in order to load users' words from db
+                                        entireSessionVocabulary = db.getVocabulary(nickname);
+                                        tableModelVocabulary.setCells(entireSessionVocabulary);
                                         new Thread(new Runnable() {
                                             @Override
                                             public void run(){
@@ -207,8 +207,11 @@ public class GuiMain {
                     class PanelMenuInner extends JPanel {
                         PanelMenuInner() {
                             super(new CardLayout());
-                            class CheckedWordsTableModel extends WordsTableModel {
+                            class CheckedWordsTableModel extends TableModelWords {
                                 HashSet<WordsPair> set = new HashSet<>();
+                                CheckedWordsTableModel(int capacity) {
+                                    super(capacity);
+                                }
                                 public boolean contains(WordsPair wordsPair) {
                                     return set.contains(wordsPair);
                                 }
@@ -223,7 +226,7 @@ public class GuiMain {
                                 }
                             };
                             class PanelVocab extends JPanel {
-                                PanelVocab(WordsTableModel vocabTableModel, CheckedWordsTableModel trainingTableModel) {
+                                PanelVocab(TableModelWords vocabTableModel, CheckedWordsTableModel trainingTableModel) {
                                     super(new GridBagLayout());
                                     JTable vocabTable = new JTable(vocabTableModel);
                                     vocabTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -300,7 +303,7 @@ public class GuiMain {
                                 }
                             };
                             class PanelNewWordAddition extends JPanel {
-                                PanelNewWordAddition(WordsTableModel vocabTableModel) {
+                                PanelNewWordAddition(TableModelWords vocabTableModel) {
                                     super(new GridBagLayout());
                                     JLabel labelEng = new JLabel("Слово на английском:");
                                     JTextField textFieldEng = new JTextField();
@@ -318,14 +321,14 @@ public class GuiMain {
                                         public void actionPerformed(ActionEvent e) {
                                             if (textFieldEng.getText().equals("") || textFieldRus.getText().equals("")) {
                                                 labelLog.setText("Поля не могут быть пустыми");
-                                            } else if (entireSessionVocabularity.containsKey(textFieldEng.getText())) {
+                                            } else if (entireSessionVocabulary.containsKey(textFieldEng.getText())) {
                                                 labelLog.setText("Слово уже есть в словаре!");
                                             } else {
                                                 labelLog.setForeground(Color.green);
                                                 labelLog.setText("Добавлено");
                                                 String eng = textFieldEng.getText();
                                                 String rus = textFieldRus.getText();
-                                                entireSessionVocabularity.put(eng, rus);
+                                                entireSessionVocabulary.put(eng, rus);
                                                 vocabTableModel.addRow(new WordsPair(eng, rus));
                                                 db.addWord(nickname, eng, rus);
                                             }
@@ -370,10 +373,10 @@ public class GuiMain {
                                     add(labelLog, c);
                                 }
                             };
-                            WordsTableModel vocabTableModel = new WordsTableModel(entireSessionVocabularity);
-                            CheckedWordsTableModel trainingTableModel = new CheckedWordsTableModel();
-                            add(new PanelVocab(vocabTableModel, trainingTableModel), "Показать словарь");
-                            add(new PanelNewWordAddition(vocabTableModel), "Добавить слово");
+                            tableModelVocabulary = new TableModelWords();
+                            CheckedWordsTableModel tableModelTraining = new CheckedWordsTableModel(AMOUNT_OF_WORDS_FOR_TRAINING);
+                            add(new PanelVocab(tableModelVocabulary, tableModelTraining), "Показать словарь");
+                            add(new PanelNewWordAddition(tableModelVocabulary), "Добавить слово");
                         }
                     }
                     class FunctionToolbar extends JToolBar {
@@ -393,7 +396,7 @@ public class GuiMain {
                             buttonShowVocab.addActionListener(new ToolBarInteract());
                         }
                     }
-                    PanelMenuInner panelMenuInner = new PanelMenuInner(); //Here because it interacts with FunctionToolbar. DO NOT MOVE!
+                    PanelMenuInner panelMenuInner = new PanelMenuInner();
                     add(new FunctionToolbar(panelMenuInner), BorderLayout.NORTH);
                     add(panelMenuInner, BorderLayout.CENTER);
                 }
@@ -445,7 +448,8 @@ public class GuiMain {
         accounts = db.getAccounts();
         mainPanel = new JPanel(new CardLayout());
         mainPanel.add(new AuthorizationPanel(), "Authorization");
-        frame = new JFrame("И снова здравствуйте");
+        mainPanel.add(new AfterAuthPanel(), "Smth another");
+        frame = new JFrame("VocabularyTrainer");
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(290, 330);
         frame.setMinimumSize(new Dimension(290, 330));
