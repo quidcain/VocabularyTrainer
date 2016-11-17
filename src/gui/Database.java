@@ -60,7 +60,7 @@ class Database {
         addNewUser(nickname, password);
         createUserTable(nickname);
     }
-    public HashMap<String, String> getVocabulatiry(String nickname){
+    public HashMap<String, String> getVocabulary(String nickname){
         HashMap<String, String> entireSessionVocabularity = new HashMap<>();
         try (Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery("SELECT * FROM " + nickname + " ;")) {

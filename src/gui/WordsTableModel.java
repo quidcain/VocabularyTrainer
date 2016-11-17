@@ -12,7 +12,6 @@ class WordsTableModel extends AbstractTableModel{
     private String[] columnNames = { "Английский", "Русский" };
     private ArrayList<WordsPair> cells;
     WordsTableModel(HashMap<String, String> entireSessionVocabularity) {
-        super();
         cells = new ArrayList<>();
         for( Map.Entry<String, String> entry : entireSessionVocabularity.entrySet() ) {
             WordsPair pair  = new WordsPair(entry.getKey(), entry.getValue());

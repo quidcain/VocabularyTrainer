@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -86,7 +87,7 @@ public class GuiMain {
                                         buttonLogin.setEnabled(false);
                                         labelLog.setForeground(Color.green);
                                         labelLog.setText("Успех!");
-                                        entireSessionVocabularity = db.getVocabulatiry(nickname);
+                                        entireSessionVocabularity = db.getVocabulary(nickname);
                                         mainPanel.add(new AfterAuthPanel(), "Smth another"); //Creates second part of GUI solely after login, in order to load users' words from db
                                         new Thread(new Runnable() {
                                             @Override
@@ -211,10 +212,13 @@ public class GuiMain {
                                 public boolean contains(WordsPair wordsPair) {
                                     return set.contains(wordsPair);
                                 }
-                                public void add(WordsPair wordsPair) {
+                                @Override
+                                public void addRow(WordsPair wordsPair) {
+                                    super.addRow(wordsPair);
                                     set.add(wordsPair);
                                 }
-                                public void remove(WordsPair wordsPair) {
+                                public void removeRow(WordsPair wordsPair, int index) {
+                                    removeRow(index);
                                     set.remove(wordsPair);
                                 }
                             };
@@ -265,7 +269,6 @@ public class GuiMain {
                                             int selectedRow = vocabTable.getSelectedRow();
                                             if (selectedRow != -1 && trainingTableModel.getRowCount() < 5
                                                     && !trainingTableModel.contains(vocabTableModel.getRow(selectedRow))) {
-                                                trainingTableModel.add(vocabTableModel.getRow(selectedRow));
                                                 trainingTableModel.addRow(vocabTableModel.getRow(selectedRow));
                                                 int nextSelect = (selectedRow < vocabTableModel.getRowCount() - 1 ? selectedRow + 1 : 0);
                                                 vocabTable.setRowSelectionInterval(nextSelect, nextSelect);
@@ -278,8 +281,7 @@ public class GuiMain {
                                         public void actionPerformed(ActionEvent e) {
                                             int selectedRow = trainingTable.getSelectedRow();
                                             if (selectedRow != -1) {
-                                                trainingTableModel.remove(trainingTableModel.getRow(selectedRow));
-                                                trainingTableModel.removeRow(selectedRow);
+                                                trainingTableModel.removeRow(trainingTableModel.getRow(selectedRow), selectedRow);
                                                 if (trainingTableModel.getRowCount() != 0) {
                                                     int nextSelect = (selectedRow == trainingTableModel.getRowCount() ? selectedRow - 1 : selectedRow);
                                                     trainingTable.setRowSelectionInterval(nextSelect, nextSelect);
@@ -368,8 +370,8 @@ public class GuiMain {
                                     add(labelLog, c);
                                 }
                             };
-                            WordsTableModel vocabTableModel = new WordsTableModel(entireSessionVocabularity); // it's here because it interacts with other panel
-                            CheckedWordsTableModel trainingTableModel = new CheckedWordsTableModel(); // and this too
+                            WordsTableModel vocabTableModel = new WordsTableModel(entireSessionVocabularity);
+                            CheckedWordsTableModel trainingTableModel = new CheckedWordsTableModel();
                             add(new PanelVocab(vocabTableModel, trainingTableModel), "Показать словарь");
                             add(new PanelNewWordAddition(vocabTableModel), "Добавить слово");
                         }
