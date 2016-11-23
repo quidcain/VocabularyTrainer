@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -199,6 +200,8 @@ public class GuiMain {
         }
     }
     private class AfterAuthPanel extends JPanel {
+        private TrainingLogic trainingLogic;
+        private JLabel labelKnownWord; //here because it's need to load word after starting training
         AfterAuthPanel() {
             super(new CardLayout());
             class PanelMenu extends JPanel {
@@ -208,21 +211,31 @@ public class GuiMain {
                         PanelMenuInner() {
                             super(new CardLayout());
                             class CheckedWordsTableModel extends TableModelWords {
-                                HashSet<WordsPair> set = new HashSet<>();
+                                //HashSet<WordsPair> set = new HashSet<>();
+                                HashMap<String, String> map = new HashMap<>();
                                 CheckedWordsTableModel(int capacity) {
                                     super(capacity);
                                 }
                                 public boolean contains(WordsPair wordsPair) {
-                                    return set.contains(wordsPair);
+                                    //return set.contains(wordsPair);
+                                    return map.containsKey(wordsPair.eng);
                                 }
                                 @Override
                                 public void addRow(WordsPair wordsPair) {
                                     super.addRow(wordsPair);
-                                    set.add(wordsPair);
+                                    //set.add(wordsPair);
+                                    map.put(wordsPair.eng, wordsPair.rus);
                                 }
                                 public void removeRow(WordsPair wordsPair, int index) {
                                     removeRow(index);
-                                    set.remove(wordsPair);
+                                    //set.remove(wordsPair);
+                                    map.remove(wordsPair.eng);
+                                }
+                                public ArrayList<WordsPair> getCells() {
+                                    return cells;
+                                }
+                                public HashMap<String, String> getMap() {
+                                    return map;
                                 }
                             };
                             class PanelVocab extends JPanel {
@@ -296,6 +309,9 @@ public class GuiMain {
                                     buttonTrainingStart.addActionListener(new ActionListener() {
                                         @Override
                                         public void actionPerformed(ActionEvent e) {
+                                            trainingLogic = new TrainingLogic(trainingTableModel.getCells(), trainingTableModel.getMap());
+                                            trainingLogic.shuffle();
+                                            labelKnownWord.setText(trainingLogic.getCurrentWord().eng);
                                             CardLayout cl = (CardLayout)(AfterAuthPanel.this.getLayout());
                                             cl.show(AfterAuthPanel.this, "training");
                                         }
@@ -401,41 +417,71 @@ public class GuiMain {
                     add(panelMenuInner, BorderLayout.CENTER);
                 }
             }
-            class TrainingPanel extends JPanel {
-                TrainingPanel(){
-                    super(new GridBagLayout());
-                    JLabel labelKnownWord = new JLabel("Известное слово:");
-                    JTextField textFieldTranslation = new JTextField();
-                    textFieldTranslation.setPreferredSize(new Dimension(220, 20));
-                    textFieldTranslation.setDocument(new JTextFieldLimit(40));
-                    JButton buttonAnswer = new JButton("Ответить");
-                    JLabel labelLog = new JLabel("");
-                    labelLog.setForeground(Color.red);
-                    GridBagConstraints c = new GridBagConstraints();
-                    c.gridx = 0;
-                    c.gridy = 0;
-                    c.anchor = GridBagConstraints.CENTER;
-                    c.insets = new Insets(5, 0, 5, 0);
-                    add(labelKnownWord, c);
-                    c.gridx = 0;
-                    c.gridy = 1;
-                    add(textFieldTranslation, c);
-                    c.gridx = 0;
-                    c.gridy = 2;
-                    add(buttonAnswer, c);
-                    c.gridx = 0;
-                    c.gridy = 3;
-                    add(labelLog, c);
-                    buttonAnswer.addActionListener(new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-
+            class PanelTraining extends JPanel {
+                private JLabel labelResult;
+                PanelTraining() {
+                    super(new CardLayout());
+                    class PanelTrainingFirstStage extends JPanel {
+                        PanelTrainingFirstStage(){
+                            super(new GridBagLayout());
+                            labelKnownWord = new JLabel("Известное слово");
+                            JTextField textFieldTranslation = new JTextField();
+                            textFieldTranslation.setPreferredSize(new Dimension(220, 20));
+                            textFieldTranslation.setDocument(new JTextFieldLimit(40));
+                            JButton buttonAnswer = new JButton("Ответить");
+                            JLabel labelLog = new JLabel("");
+                            labelLog.setForeground(Color.red);
+                            GridBagConstraints c = new GridBagConstraints();
+                            c.gridx = 0;
+                            c.gridy = 0;
+                            c.anchor = GridBagConstraints.CENTER;
+                            c.insets = new Insets(5, 0, 5, 0);
+                            add(labelKnownWord, c);
+                            c.gridx = 0;
+                            c.gridy = 1;
+                            add(textFieldTranslation, c);
+                            c.gridx = 0;
+                            c.gridy = 2;
+                            add(buttonAnswer, c);
+                            c.gridx = 0;
+                            c.gridy = 3;
+                            add(labelLog, c);
+                            buttonAnswer.addActionListener(new ActionListener() {
+                                @Override
+                                public void actionPerformed(ActionEvent e) {
+                                    if (textFieldTranslation.getText().equals(trainingLogic.getRusTranslation()))
+                                        trainingLogic.incrementCorrectAnswers();
+                                    trainingLogic.incrementTotalQuestions();
+                                    if (trainingLogic.isCurrentLast()) {
+                                        CardLayout cl = (CardLayout)(PanelTraining.this.getLayout());
+                                        cl.show(PanelTraining.this, "result");
+                                        labelResult.setText(String.format("<html>Ваш результат:%d/%d<br>С вами все плохо...</html>", trainingLogic.getCorrectAnswers(), trainingLogic.getTotalQuestions()));
+                                    } else {
+                                        trainingLogic.incrementCurrentIndex();
+                                        labelKnownWord.setText(trainingLogic.getCurrentWord().eng);
+                                    }
+                                }
+                            });
                         }
-                    });
+                    }
+                    class PanelTrainingResult extends JPanel {
+                        PanelTrainingResult(){
+                            super(new GridBagLayout());
+                            labelResult = new JLabel();
+                            GridBagConstraints c = new GridBagConstraints();
+                            c.gridx = 0;
+                            c.gridy = 0;
+                            c.anchor = GridBagConstraints.CENTER;
+                            c.insets = new Insets(5, 0, 5, 0);
+                            add(labelResult, c);
+                        }
+                    }
+                    add(new PanelTrainingFirstStage(), "firstStage");
+                    add(new PanelTrainingResult(), "result");
                 }
             }
             add(new PanelMenu(),"menu");
-            add(new TrainingPanel(), "training");
+            add(new PanelTraining(), "training");
         }
     }
     GuiMain() {

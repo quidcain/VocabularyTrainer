@@ -10,14 +10,7 @@ import java.util.Map;
  */
 class TableModelWords extends AbstractTableModel{
     private String[] columnNames = { "Английский", "Русский" };
-    private ArrayList<WordsPair> cells;
-    /*TableModelWords(HashMap<String, String> entireSessionVocabularity) {
-        cells = new ArrayList<>();
-        for( Map.Entry<String, String> entry : entireSessionVocabularity.entrySet() ) {
-            WordsPair pair  = new WordsPair(entry.getKey(), entry.getValue());
-            cells.add(pair);
-        }
-    }*/
+    protected ArrayList<WordsPair> cells;
     TableModelWords(int capacity) {
         cells = new ArrayList<>(capacity);
     }
