@@ -83,7 +83,7 @@ public class GuiMain {
                                     }
                                     String actualPass = accounts.get(nickname);
                                     if (actualPass == null)
-                                        labelLog.setText("Такого пользователя не существует");
+                                        labelLog.setText("<html>Такого пользователя<br>не существует</html>");
                                     else if (!actualPass.equals(password))
                                         labelLog.setText("Неправильный пароль");
                                     else {

@@ -16,7 +16,7 @@ class TrainingLogic {
         Collections.shuffle(arrayList);
         currentIndex = 0;
     }
-    public TrainingLogic(ArrayList<WordsPair> arrayList) {
+    TrainingLogic(ArrayList<WordsPair> arrayList) {
         this.arrayList = new ArrayList<>(arrayList);
         shuffle();
     }
