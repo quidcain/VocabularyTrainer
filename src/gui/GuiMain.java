@@ -34,15 +34,14 @@ public class GuiMain {
                             textFieldNick.setPreferredSize(new Dimension(220, 20));
                             textFieldNick.setDocument(nickLimit);
                             JLabel labelPass = new JLabel("Ваш пароль:");
-                            //JTextField textFieldPass = new JTextField();
-                            //textFieldPass.setPreferredSize(new Dimension(220, 20));
-                            //textFieldPass.setDocument(passLimit);
                             JPasswordField passwordField = new JPasswordField();
                             passwordField.setPreferredSize(new Dimension(220, 20));
                             passwordField.setDocument(new JTextFieldLimit(20));
-
                             JButton buttonLogin = new JButton("Войти");
                             JLabel labelLog = new JLabel();
+                            labelLog.setHorizontalAlignment(SwingConstants.CENTER);
+                            labelLog.setVerticalAlignment(SwingConstants.CENTER);
+                            labelLog.setPreferredSize(new Dimension(220, 40));
                             labelLog.setForeground(Color.red);
 
                             GridBagConstraints c = new GridBagConstraints();
@@ -61,7 +60,6 @@ public class GuiMain {
                             c.insets = new Insets(5,0,5,0);
                             c.gridy = 3;
                             c.gridwidth = 2;
-                            //add(textFieldPass,c);
                             add(passwordField, c);
                             c.insets = new Insets(10,0,5,0);
                             c.gridy = 4;
@@ -70,13 +68,13 @@ public class GuiMain {
                             c.gridy = 5;
                             c.gridwidth = 3;
                             c.weighty = 1;
+                            c.anchor = GridBagConstraints.CENTER;
                             add(labelLog, c);
 
                             buttonLogin.addActionListener(new ActionListener() {
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
                                     nickname = textFieldNick.getText();
-                                    //String password = textFieldPass.getText();
                                     String password = new String(passwordField.getPassword());
                                     labelLog.setForeground(Color.red);
                                     labelLog.setText("");
@@ -131,6 +129,8 @@ public class GuiMain {
                             textFieldRepeatPass.setDocument(new JTextFieldLimit(20));
                             JButton buttonSignUp = new JButton("Зарегистрироваться");
                             JLabel labelLog = new JLabel();
+
+                            labelLog.setPreferredSize(new Dimension(220, 40));
                             labelLog.setForeground(Color.green);
 
                             GridBagConstraints c = new GridBagConstraints();
@@ -162,7 +162,6 @@ public class GuiMain {
                             c.gridy = 6;
                             add(buttonSignUp,c);
                             c.gridy = 7;
-                            c.weighty = 1;
                             c.insets = new Insets(0,0,10,0);
                             add(labelLog,c);
                             buttonSignUp.addActionListener(new ActionListener() {
@@ -174,13 +173,13 @@ public class GuiMain {
                                     labelLog.setForeground(Color.red);
                                     labelLog.setText("");
                                     if (nickname.equals("") || password.equals("")) {
-                                        labelLog.setText("Пароль и логин не могут быть пусты!");
+                                        labelLog.setText("Заполните все поля!");
                                         return;
                                     }else if (!password.equals(repeatedPassword)) {
                                         labelLog.setText("Пароли не совпадают!");
                                         return;
                                     }else if(accounts.containsKey(nickname)){
-                                        labelLog.setText("Такой пользователь уже существует!");
+                                        labelLog.setText("<html>Такой пользователь уже<br> существует!</html>");
                                         return;
                                     }else {
                                         accounts.put(nickname, password);
@@ -194,7 +193,6 @@ public class GuiMain {
                     }
                     addTab("Вход", new PanelLogin(limitNick));
                     addTab("Регистрация", new PanelSignUp(limitNick));
-                    setPreferredSize(new Dimension(220, 280));
                 }
             };
             GridBagConstraints c = new GridBagConstraints();
@@ -435,6 +433,9 @@ public class GuiMain {
                             textFieldTranslation.setDocument(new JTextFieldLimit(40));
                             JButton buttonAnswer = new JButton("Ответить");
                             JLabel labelLog = new JLabel("");
+                            labelLog.setPreferredSize(new Dimension(120, 20));
+                            labelLog.setHorizontalAlignment(SwingConstants.CENTER);
+                            labelLog.setVerticalAlignment(SwingConstants.CENTER);
                             labelLog.setForeground(Color.red);
                             GridBagConstraints c = new GridBagConstraints();
                             c.gridx = 0;
@@ -454,12 +455,25 @@ public class GuiMain {
                             buttonAnswer.addActionListener(new ActionListener() {
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
-                                    if (textFieldTranslation.getText().equals(trainingLogic.getRusTranslation()))
+                                    labelLog.setForeground(Color.red);
+                                    if (textFieldTranslation.getText().equals(trainingLogic.getRusTranslation())) {
                                         trainingLogic.incrementCorrectAnswers();
+                                        labelLog.setForeground(Color.green);
+                                        labelLog.setText("Верно!");
+                                    } else
+                                        labelLog.setText("Не верно!");
+                                    new Thread(new Runnable() {
+                                        @Override
+                                        public void run(){
+                                            try {
+                                                Thread.sleep(500);
+                                                labelLog.setText("");
+                                            } catch (InterruptedException e) {
+                                            }
+                                        }
+                                    }).start();
                                     trainingLogic.incrementTotalQuestions();
                                     if (trainingLogic.isCurrentLast()) {
-                                        CardLayout cl = (CardLayout)(PanelTraining.this.getLayout());
-                                        cl.show(PanelTraining.this, "result");
                                         textFieldTranslation.setText("");
                                         String stringResult = String.format("<html><center>Ваш результат:%d/%d</center><br>VERDICT</html>", trainingLogic.getCorrectAnswers(), trainingLogic.getTotalQuestions());
                                         double ratio = (double)trainingLogic.getCorrectAnswers() / trainingLogic.getTotalQuestions();
@@ -476,6 +490,8 @@ public class GuiMain {
                                         else
                                             stringResult = stringResult.replaceFirst("VERDICT", "Результат ужасен, получше изучите слова и возвращайтесь");
                                         labelResult.setText(stringResult);
+                                        CardLayout cl = (CardLayout)(PanelTraining.this.getLayout());
+                                        cl.show(PanelTraining.this, "result");
                                     } else {
                                         trainingLogic.incrementCurrentIndex();
                                         labelKnownWord.setText(trainingLogic.getCurrentWord().eng);
