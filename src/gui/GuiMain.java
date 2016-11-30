@@ -26,18 +26,21 @@ public class GuiMain {
             class TabbedPaneLogSign extends JTabbedPane{
                 TabbedPaneLogSign() {
                     JTextFieldLimit limitNick = new JTextFieldLimit(20);
-                    JTextFieldLimit limitPass = new JTextFieldLimit(20);
                     class PanelLogin extends JPanel {
-                        PanelLogin(JTextFieldLimit nickLimit, JTextFieldLimit passLimit){
+                        PanelLogin(JTextFieldLimit nickLimit){
                             super(new GridBagLayout());
                             JLabel labelNick = new JLabel("Ваш никнейм:");
                             JTextField textFieldNick = new JTextField();
                             textFieldNick.setPreferredSize(new Dimension(220, 20));
                             textFieldNick.setDocument(nickLimit);
                             JLabel labelPass = new JLabel("Ваш пароль:");
-                            JTextField textFieldPass = new JTextField();
-                            textFieldPass.setPreferredSize(new Dimension(220, 20));
-                            textFieldPass.setDocument(passLimit);
+                            //JTextField textFieldPass = new JTextField();
+                            //textFieldPass.setPreferredSize(new Dimension(220, 20));
+                            //textFieldPass.setDocument(passLimit);
+                            JPasswordField passwordField = new JPasswordField();
+                            passwordField.setPreferredSize(new Dimension(220, 20));
+                            passwordField.setDocument(new JTextFieldLimit(20));
+
                             JButton buttonLogin = new JButton("Войти");
                             JLabel labelLog = new JLabel();
                             labelLog.setForeground(Color.red);
@@ -50,29 +53,31 @@ public class GuiMain {
                             add(labelNick, c);
                             c.gridy = 1;
                             c.gridwidth = 2;
-                            add(textFieldNick,c);
+                            add(textFieldNick, c);
                             c.insets = new Insets(10,0,5,0);
                             c.gridy = 2;
                             c.gridwidth = 1;
-                            add(labelPass,c);
+                            add(labelPass, c);
                             c.insets = new Insets(5,0,5,0);
                             c.gridy = 3;
                             c.gridwidth = 2;
-                            add(textFieldPass,c);
+                            //add(textFieldPass,c);
+                            add(passwordField, c);
                             c.insets = new Insets(10,0,5,0);
                             c.gridy = 4;
                             c.gridwidth = 1;
-                            add(buttonLogin,c);
+                            add(buttonLogin, c);
                             c.gridy = 5;
                             c.gridwidth = 3;
                             c.weighty = 1;
-                            add(labelLog,c);
+                            add(labelLog, c);
 
                             buttonLogin.addActionListener(new ActionListener() {
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
                                     nickname = textFieldNick.getText();
-                                    String password = textFieldPass.getText();
+                                    //String password = textFieldPass.getText();
+                                    String password = new String(passwordField.getPassword());
                                     labelLog.setForeground(Color.red);
                                     labelLog.setText("");
                                     if (nickname.equals("") || password.equals("")) {
@@ -110,7 +115,7 @@ public class GuiMain {
                         }
                     }
                     class PanelSignUp extends JPanel {
-                        PanelSignUp(JTextFieldLimit nickLimit, JTextFieldLimit passLimit) {
+                        PanelSignUp(JTextFieldLimit nickLimit) {
                             super(new GridBagLayout());
                             JLabel labelNick = new JLabel("Ваш никнейм:");
                             JTextField textFieldNick = new JTextField();
@@ -119,7 +124,7 @@ public class GuiMain {
                             JLabel labelPass = new JLabel("Ваш пароль:");
                             JTextField textFieldPass = new JTextField();
                             textFieldPass.setPreferredSize(new Dimension(220, 20));
-                            textFieldPass.setDocument(passLimit);
+                            textFieldPass.setDocument(new JTextFieldLimit(20));
                             JLabel labelRepeatPass = new JLabel("Повторите пароль:");
                             JTextField textFieldRepeatPass = new JTextField();
                             textFieldRepeatPass.setPreferredSize(new Dimension(220, 20));
@@ -187,8 +192,8 @@ public class GuiMain {
                             });
                         }
                     }
-                    addTab("Вход", new PanelLogin(limitNick, limitPass));
-                    addTab("Регистрация", new PanelSignUp(limitNick, limitPass));
+                    addTab("Вход", new PanelLogin(limitNick));
+                    addTab("Регистрация", new PanelSignUp(limitNick));
                     setPreferredSize(new Dimension(220, 280));
                 }
             };
