@@ -97,5 +97,12 @@ class Database {
             System.out.println(sqlEx.getMessage());
         }
     }
-    //public void deleteWord() {}
+    public void removeWord(String nickname, String eng) {
+        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM " + nickname + " where eng=?;")) {
+            statement.setString(1, eng);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
 }

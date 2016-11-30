@@ -326,6 +326,7 @@ public class GuiMain {
                                     textFieldRus.setDocument(new JTextFieldLimit(20));
                                     JButton buttonAdd = new JButton("Добавить");
                                     JLabel labelLog = new JLabel();
+                                    labelLog.setPreferredSize(new Dimension(220, 20));
                                     labelLog.setForeground(Color.red);
                                     buttonAdd.addActionListener(new ActionListener() {
                                         @Override
@@ -380,7 +381,67 @@ public class GuiMain {
                                     add(buttonAdd, c);
                                     c.gridy = 5;
                                     c.gridwidth = 3;
-                                    c.weighty = 1;
+                                    add(labelLog, c);
+                                }
+                            };
+                            class PanelWordRemoval extends JPanel {
+                                PanelWordRemoval() {
+                                    super(new GridBagLayout());
+                                    JLabel labelEng = new JLabel("Слово на английском:");
+                                    JTextField textFieldEng = new JTextField();
+                                    textFieldEng.setPreferredSize(new Dimension(220, 20));
+                                    textFieldEng.setDocument(new JTextFieldLimit(20));
+                                    JButton buttonRemove = new JButton("Удалить");
+                                    JLabel labelLog = new JLabel();
+                                    labelLog.setPreferredSize(new Dimension(220, 20));
+                                    labelLog.setForeground(Color.red);
+                                    buttonRemove.addActionListener(new ActionListener() {
+                                        @Override
+                                        public void actionPerformed(ActionEvent e) {
+                                            if (textFieldEng.getText().equals("")) {
+                                                labelLog.setText("Поле не может быть пустым");
+                                            } else if (!entireSessionVocabulary.containsKey(textFieldEng.getText())) {
+                                                labelLog.setText("Такого слова нет в словаре!");
+                                            } else {
+                                                labelLog.setForeground(Color.green);
+                                                labelLog.setText("Удалено");
+                                                String eng = textFieldEng.getText();
+                                                entireSessionVocabulary.remove(textFieldEng.getText());
+                                                for (int i = 0; i < tableModelVocabulary.getRowCount(); ++i)
+                                                    if (tableModelVocabulary.getRow(i).eng.equals(textFieldEng.getText())) {
+                                                        tableModelVocabulary.removeRow(i);
+                                                        db.removeWord(nickname, textFieldEng.getText());
+                                                    }
+                                            }
+                                            new Thread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    try {
+                                                        Thread.sleep(1000);
+                                                    } catch (InterruptedException e1) {
+                                                        e1.printStackTrace();
+                                                    }
+                                                    labelLog.setForeground(Color.red);
+                                                    labelLog.setText("");
+                                                }
+                                            }).start();
+                                        }
+                                    });
+                                    GridBagConstraints c = new GridBagConstraints();
+                                    c.gridx = 0;
+                                    c.gridy = 0;
+                                    c.anchor = GridBagConstraints.LINE_START;
+                                    c.insets = new Insets(5, 0, 5, 0);
+                                    add(labelEng, c);
+                                    c.gridy = 1;
+                                    c.gridwidth = 2;
+                                    add(textFieldEng, c);
+                                    c.insets = new Insets(10, 0, 5, 0);
+                                    c.gridy = 2;
+                                    c.gridwidth = 1;
+                                    add(buttonRemove, c);
+                                    c.gridy = 3;
+                                    c.gridwidth = 3;
                                     add(labelLog, c);
                                 }
                             };
@@ -388,14 +449,17 @@ public class GuiMain {
                             CheckedWordsTableModel tableModelTraining = new CheckedWordsTableModel(AMOUNT_OF_WORDS_FOR_TRAINING);
                             add(new PanelVocab(tableModelTraining), "Показать словарь");
                             add(new PanelNewWordAddition(), "Добавить слово");
+                            add(new PanelWordRemoval(), "Удалить слово");
                         }
                     }
                     class FunctionToolbar extends JToolBar {
                         public FunctionToolbar(PanelMenuInner panelMenuInner) {
                             JButton buttonShowNewOwnWordAddition = new JButton("Добавить слово");
                             JButton buttonShowVocab = new JButton("Показать словарь");
+                            JButton buttonShowWordRemoval = new JButton("Удалить слово");
                             add(buttonShowVocab);
                             add(buttonShowNewOwnWordAddition);
+                            add(buttonShowWordRemoval);
                             class ToolBarInteract implements ActionListener {
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
@@ -405,6 +469,7 @@ public class GuiMain {
                             }
                             buttonShowNewOwnWordAddition.addActionListener(new ToolBarInteract());
                             buttonShowVocab.addActionListener(new ToolBarInteract());
+                            buttonShowWordRemoval.addActionListener(new ToolBarInteract());
                         }
                     }
                     PanelMenuInner panelMenuInner = new PanelMenuInner();
