@@ -1,16 +1,12 @@
 package gui;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by stoat on 11/18/16.
  */
 class TrainingLogic {
     private ArrayList<WordsPair> arrayList;
-    private HashMap<String, String> hashMap;
     private static final int lastStage = 3;
     private int currentIndex = 0;
     private int correctAnswers = 0;
@@ -20,9 +16,8 @@ class TrainingLogic {
         Collections.shuffle(arrayList);
         currentIndex = 0;
     }
-    public TrainingLogic(ArrayList<WordsPair> arrayList, HashMap<String, String> hashMap) {
+    public TrainingLogic(ArrayList<WordsPair> arrayList) {
         this.arrayList = new ArrayList<>(arrayList);
-        this.hashMap = hashMap;
         shuffle();
     }
     public String getCurrentAskedWord() {
@@ -33,16 +28,10 @@ class TrainingLogic {
     }
     public boolean isCorrectTranslation(String translation) {
         boolean result = false;
-        if (stage % 2 == 1) {
-            result = translation.equals(hashMap.get(arrayList.get(currentIndex).eng));
-        } else {
-            for (Map.Entry<String, String> entry : hashMap.entrySet()) {
-                if(translation.equals(entry.getKey())) {
-                    result = true;
-                    break;
-                }
-            }
-        }
+        if (stage % 2 == 1)
+            result = translation.equals(arrayList.get(currentIndex).rus);
+        else
+            result = translation.equals(arrayList.get(currentIndex).eng);
         if(result)
             correctAnswers++;
         totalQuestions++;

@@ -213,24 +213,20 @@ public class GuiMain {
                         PanelMenuInner() {
                             super(new CardLayout());
                             class CheckedWordsTableModel extends TableModelWords {
-                                //HashSet<WordsPair> set = new HashSet<>();
                                 HashMap<String, String> map = new HashMap<>();
                                 CheckedWordsTableModel(int capacity) {
                                     super(capacity);
                                 }
                                 public boolean contains(WordsPair wordsPair) {
-                                    //return set.contains(wordsPair);
                                     return map.containsKey(wordsPair.eng);
                                 }
                                 @Override
                                 public void addRow(WordsPair wordsPair) {
                                     super.addRow(wordsPair);
-                                    //set.add(wordsPair);
                                     map.put(wordsPair.eng, wordsPair.rus);
                                 }
                                 public void removeRow(WordsPair wordsPair, int index) {
                                     removeRow(index);
-                                    //set.remove(wordsPair);
                                     map.remove(wordsPair.eng);
                                 }
                                 public ArrayList<WordsPair> getCells() {
@@ -239,7 +235,7 @@ public class GuiMain {
                                 public HashMap<String, String> getMap() {
                                     return map;
                                 }
-                            };
+                            }
                             class PanelVocab extends JPanel {
                                 PanelVocab(CheckedWordsTableModel trainingTableModel) {
                                     super(new GridBagLayout());
@@ -247,34 +243,32 @@ public class GuiMain {
                                     vocabTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
                                     JScrollPane jsp = new JScrollPane(vocabTable);
                                     jsp.setPreferredSize(new Dimension(240, 160));
+                                    JTable trainingTable = new JTable(trainingTableModel);
+                                    JScrollPane jsp2 = new JScrollPane(trainingTable);
+                                    jsp2.setPreferredSize(new Dimension(240, 160));
                                     GridBagConstraints c = new GridBagConstraints();
+                                    JButton buttonRight = new JButton("-->");
+                                    JButton buttonLeft = new JButton("<--");
+                                    JButton buttonTrainingStart = new JButton("Тренировка");
+                                    buttonTrainingStart.setEnabled(false);
                                     c.gridx = 0;
                                     c.gridy = 0;
                                     c.gridheight = 3;
                                     add(jsp, c);
-
-                                    JButton buttonRight = new JButton("-->");
                                     c.gridx = 1;
                                     c.gridy = 0;
                                     c.insets = new Insets(40,10,0,10);
                                     c.gridheight = 1;
                                     add(buttonRight, c);
-                                    JButton buttonLeft = new JButton("<--");
                                     c.gridx = 1;
                                     c.gridy = 1;
                                     c.insets = new Insets(0,10,0,10);
                                     add(buttonLeft, c);
-
-                                    JTable trainingTable = new JTable(trainingTableModel);
-                                    JScrollPane jsp2 = new JScrollPane(trainingTable);
-                                    jsp2.setPreferredSize(new Dimension(240, 160));
                                     c.gridx = 2;
                                     c.gridy = 0;
                                     c.gridheight = 3;
                                     c.insets = new Insets(0,0,0,0);
                                     add(jsp2, c);
-                                    JButton buttonTrainingStart = new JButton("Тренировка");
-                                    buttonTrainingStart.setEnabled(false);
                                     c.gridx = 0;
                                     c.gridy = 3;
                                     c.gridwidth = 3;
@@ -311,7 +305,7 @@ public class GuiMain {
                                     buttonTrainingStart.addActionListener(new ActionListener() {
                                         @Override
                                         public void actionPerformed(ActionEvent e) {
-                                            trainingLogic = new TrainingLogic(trainingTableModel.getCells(), trainingTableModel.getMap());
+                                            trainingLogic = new TrainingLogic(trainingTableModel.getCells());
                                             labelAskedWord.setText(trainingLogic.getCurrentAskedWord());
                                             CardLayout cl = (CardLayout)(AfterAuthPanel.this.getLayout());
                                             cl.show(AfterAuthPanel.this, "training");

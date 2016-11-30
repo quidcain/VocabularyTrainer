@@ -24,9 +24,6 @@ class Database {
             e.printStackTrace();
         }
     }
-    public Connection getConnection() {
-        return connection;
-    }
     public HashMap<String, String> getAccounts(){
         HashMap<String, String> accounts = new HashMap<>();
         try (Statement statement = connection.createStatement();
@@ -69,7 +66,6 @@ class Database {
             return entireSessionVocabularity;
         } catch (SQLException e) {
             //it can't happen
-            System.out.println("Can't get connection: " + e.getMessage());
             return null;
         }
     }
