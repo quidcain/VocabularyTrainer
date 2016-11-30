@@ -455,7 +455,22 @@ public class GuiMain {
                                     if (trainingLogic.isCurrentLast()) {
                                         CardLayout cl = (CardLayout)(PanelTraining.this.getLayout());
                                         cl.show(PanelTraining.this, "result");
-                                        labelResult.setText(String.format("<html>Ваш результат:%d/%d<br>С вами все плохо...</html>", trainingLogic.getCorrectAnswers(), trainingLogic.getTotalQuestions()));
+                                        textFieldTranslation.setText("");
+                                        String stringResult = String.format("<html><center>Ваш результат:%d/%d</center><br>VERDICT</html>", trainingLogic.getCorrectAnswers(), trainingLogic.getTotalQuestions());
+                                        double ratio = (double)trainingLogic.getCorrectAnswers() / trainingLogic.getTotalQuestions();
+                                        if (ratio == 1)
+                                            stringResult = stringResult.replaceFirst("VERDICT", "Вы идеально выучили слова!");
+                                        else if (ratio >= 0.8)
+                                            stringResult = stringResult.replaceFirst("VERDICT", "Хороший резуьтат!");
+                                        else if (ratio >= 0.6)
+                                            stringResult = stringResult.replaceFirst("VERDICT", "Вы знаете больше половины, так держать");
+                                        else if (ratio >= 0.4)
+                                            stringResult = stringResult.replaceFirst("VERDICT", "Что-то есть, но лучше повторите");
+                                        else if (ratio >= 0.2)
+                                            stringResult = stringResult.replaceFirst("VERDICT", "Правильные ответы были, но очень мало. Повторите материал");
+                                        else
+                                            stringResult = stringResult.replaceFirst("VERDICT", "Результат ужасен, получше изучите слова и возвращайтесь");
+                                        labelResult.setText(stringResult);
                                     } else {
                                         trainingLogic.incrementCurrentIndex();
                                         labelKnownWord.setText(trainingLogic.getCurrentWord().eng);
@@ -468,12 +483,24 @@ public class GuiMain {
                         PanelTrainingResult(){
                             super(new GridBagLayout());
                             labelResult = new JLabel();
+                            JButton buttonBackToMenu = new JButton("Назад в меню");
                             GridBagConstraints c = new GridBagConstraints();
                             c.gridx = 0;
                             c.gridy = 0;
                             c.anchor = GridBagConstraints.CENTER;
                             c.insets = new Insets(5, 0, 5, 0);
                             add(labelResult, c);
+                            c.gridy = 1;
+                            add(buttonBackToMenu, c);
+                            buttonBackToMenu.addActionListener(new ActionListener() {
+                                @Override
+                                public void actionPerformed(ActionEvent actionEvent) {
+                                    CardLayout cl = (CardLayout)(PanelTraining.this.getLayout());
+                                    cl.show(PanelTraining.this, "firstStage");
+                                    cl = (CardLayout)(AfterAuthPanel.this.getLayout());
+                                    cl.show(AfterAuthPanel.this, "menu");
+                                }
+                            });
                         }
                     }
                     add(new PanelTrainingFirstStage(), "firstStage");
