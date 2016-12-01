@@ -47,7 +47,7 @@ class Database {
     }
     public void createConnection() throws SQLException{
         connection = DriverManager.getConnection(DB_URL, LOGIN, PASSWORD);
-        deleteUser("pasha");
+        //deleteUser("pasha");
     }
     public void closeConnection() {
         try {

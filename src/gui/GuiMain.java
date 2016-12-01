@@ -128,10 +128,8 @@ public class GuiMain {
                             textFieldRepeatPass.setDocument(new JTextFieldLimit(20));
                             JButton buttonSignUp = new JButton("Зарегистрироваться");
                             JLabel labelLog = new JLabel();
-
                             labelLog.setPreferredSize(new Dimension(220, 40));
                             labelLog.setForeground(Color.green);
-
                             GridBagConstraints c = new GridBagConstraints();
                             c.gridx = 0;
                             c.gridy = 0;
@@ -203,7 +201,7 @@ public class GuiMain {
     }
     private class AfterAuthPanel extends JPanel {
         private TrainingLogic trainingLogic;
-        private JLabel labelAskedWord; //here because it's need to load word after starting training
+        private JLabel labelAskedWord; //here because it's need to load word while starting training
         AfterAuthPanel() {
             super(new CardLayout());
             class PanelMenu extends JPanel {
@@ -217,8 +215,11 @@ public class GuiMain {
                                 CheckedWordsTableModel(int capacity) {
                                     super(capacity);
                                 }
-                                public boolean contains(WordsPair wordsPair) {
+                                public boolean containsKey(WordsPair wordsPair) {
                                     return map.containsKey(wordsPair.eng);
+                                }
+                                public  boolean containsValue(WordsPair wordsPair) {
+                                    return map.containsValue(wordsPair.rus);
                                 }
                                 @Override
                                 public void addRow(WordsPair wordsPair) {
@@ -250,6 +251,11 @@ public class GuiMain {
                                     JButton buttonRight = new JButton("-->");
                                     JButton buttonLeft = new JButton("<--");
                                     JButton buttonTrainingStart = new JButton("Тренировка");
+                                    JLabel labelLog = new JLabel("");
+                                    labelLog.setPreferredSize(new Dimension(400,40));
+                                    labelLog.setHorizontalAlignment(SwingConstants.CENTER);
+                                    labelLog.setVerticalAlignment(SwingConstants.CENTER);
+                                    labelLog.setForeground(Color.red);
                                     buttonTrainingStart.setEnabled(false);
                                     c.gridx = 0;
                                     c.gridy = 0;
@@ -271,8 +277,14 @@ public class GuiMain {
                                     add(jsp2, c);
                                     c.gridx = 0;
                                     c.gridy = 3;
+                                    c.gridwidth = 5;
+                                    c.insets = new Insets(5,0,0,0);
+                                    c.gridheight = 1;
+                                    add(labelLog, c);
+                                    c.gridx = 0;
+                                    c.gridy = 4;
                                     c.gridwidth = 3;
-                                    c.insets = new Insets(10,0,0,0);
+                                    c.insets = new Insets(5,0,0,0);
                                     c.gridheight = 1;
                                     add(buttonTrainingStart, c);
                                     buttonRight.addActionListener(new ActionListener() {
@@ -280,7 +292,21 @@ public class GuiMain {
                                         public void actionPerformed(ActionEvent e) {
                                             int selectedRow = vocabTable.getSelectedRow();
                                             if (selectedRow != -1 && trainingTableModel.getRowCount() < 5
-                                                    && !trainingTableModel.contains(tableModelVocabulary.getRow(selectedRow))) {
+                                                    && !trainingTableModel.containsKey(tableModelVocabulary.getRow(selectedRow))) {
+                                                if (trainingTableModel.containsValue(tableModelVocabulary.getRow(selectedRow))) {
+                                                    labelLog.setText("Нельзя тренировать слова с одинаковым переводом");
+                                                    new Thread(new Runnable() {
+                                                        @Override
+                                                        public void run(){
+                                                            try {
+                                                                Thread.sleep(2000);
+                                                                labelLog.setText("");
+                                                            } catch (InterruptedException e) {
+                                                            }
+                                                        }
+                                                    }).start();
+                                                    return;
+                                                }
                                                 trainingTableModel.addRow(tableModelVocabulary.getRow(selectedRow));
                                                 int nextSelect = (selectedRow < tableModelVocabulary.getRowCount() - 1 ? selectedRow + 1 : 0);
                                                 vocabTable.setRowSelectionInterval(nextSelect, nextSelect);
