@@ -17,10 +17,10 @@ class TableModelWords extends AbstractTableModel{
     TableModelWords() {
         cells = new ArrayList<>();
     }
-    public void setCells(HashMap<String, String> entireSessionVocabularity) {
-        cells.ensureCapacity(entireSessionVocabularity.size());
-        for( Map.Entry<String, String> entry : entireSessionVocabularity.entrySet() ) {
-            WordsPair pair  = new WordsPair(entry.getKey(), entry.getValue());
+    public void setCells(HashMap<String, String> entireSessionVocabulary) {
+        cells.ensureCapacity(entireSessionVocabulary.size());
+        for(Map.Entry<String, String> entry : entireSessionVocabulary.entrySet()) {
+            WordsPair pair = new WordsPair(entry.getKey(), entry.getValue());
             cells.add(pair);
         }
     }

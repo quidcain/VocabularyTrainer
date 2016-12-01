@@ -27,7 +27,7 @@ class Database {
             System.out.println(e.getMessage());
         }
     }
-    private void removeAccount(String nickname) {
+    public void removeAccount(String nickname) {
         try (PreparedStatement statement = connection.prepareStatement("DELETE FROM accounts where nickname=?;")) {
             statement.setString(1, nickname);
             statement.executeUpdate();
@@ -35,7 +35,7 @@ class Database {
             System.out.println(e.getMessage());
         }
     }
-    private void deleteUserTable(String nickname) {
+    public void deleteUserTable(String nickname) {
         try (PreparedStatement statement = connection.prepareStatement("DROP TABLE IF EXISTS " + nickname + ";")) {
             statement.executeUpdate();
         } catch (SQLException e) {
@@ -47,7 +47,6 @@ class Database {
     }
     public void createConnection() throws SQLException{
         connection = DriverManager.getConnection(DB_URL, LOGIN, PASSWORD);
-        //deleteUser("pasha");
     }
     public void closeConnection() {
         try {

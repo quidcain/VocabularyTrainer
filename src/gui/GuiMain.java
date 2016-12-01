@@ -18,7 +18,11 @@ public class GuiMain {
     private Database db;
     private HashMap<String, String> accounts;
     private HashMap<String, String> entireSessionVocabulary;
+    private JTable vocabTable;
     private TableModelWords tableModelVocabulary;
+    private JTable trainingTable;
+    private CheckedWordsTableModel tableModelTraining;
+    private JLabel labelNickValue;
     private class AuthorizationPanel extends JPanel {
         AuthorizationPanel() {
             super(new GridBagLayout());
@@ -91,19 +95,26 @@ public class GuiMain {
                                         labelLog.setForeground(Color.green);
                                         labelLog.setText("Успех!");
                                         entireSessionVocabulary = db.getVocabulary(nickname);
+                                        tableModelVocabulary = new TableModelWords();
                                         tableModelVocabulary.setCells(entireSessionVocabulary);
+                                        vocabTable.setModel(tableModelVocabulary);
+                                        tableModelTraining = new CheckedWordsTableModel(AMOUNT_OF_WORDS_FOR_TRAINING);
+                                        trainingTable.setModel(tableModelTraining);
+                                        labelNickValue.setText(nickname);
                                         new Thread(new Runnable() {
                                             @Override
                                             public void run(){
                                                 try {
                                                     Thread.sleep(1000);
-                                                    frame.setSize(690, 330);
-                                                    frame.setMinimumSize(new Dimension(690, 330));
+                                                    frame.setMinimumSize(new Dimension(700, 330));
+                                                    passwordField.setText("");
+                                                    labelLog.setText("");
                                                 } catch (InterruptedException e) {
                                                     e.printStackTrace();
                                                 }
                                                 CardLayout cl = (CardLayout)(mainPanel.getLayout());
                                                 cl.show(mainPanel, "Smth another");
+                                                buttonLogin.setEnabled(true);
                                             }
                                         }).start();
                                     }
@@ -183,6 +194,19 @@ public class GuiMain {
                                         db.createNewUser(nickname, password);
                                         labelLog.setForeground(Color.green);
                                         labelLog.setText("Успешно зарегестрирован!");
+                                        new Thread(new Runnable() {
+                                            @Override
+                                            public void run(){
+                                                try {
+                                                    Thread.sleep(2000);
+                                                    labelLog.setText("");
+                                                    textFieldPass.setText("");
+                                                    textFieldRepeatPass.setText("");
+                                                } catch (InterruptedException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
+                                        }).start();
                                     }
                                 }
                             });
@@ -191,7 +215,7 @@ public class GuiMain {
                     addTab("Вход", new PanelLogin(limitNick));
                     addTab("Регистрация", new PanelSignUp(limitNick));
                 }
-            };
+            }
             GridBagConstraints c = new GridBagConstraints();
             c.gridx = 0;
             c.gridy = 0;
@@ -205,46 +229,21 @@ public class GuiMain {
         AfterAuthPanel() {
             super(new CardLayout());
             class PanelMenu extends JPanel {
+                private boolean keepVocabulary = false;
+                JLabel labelDecision;
                 PanelMenu(){
                     super(new BorderLayout());
                     class PanelMenuInner extends JPanel {
                         PanelMenuInner() {
                             super(new CardLayout());
-                            class CheckedWordsTableModel extends TableModelWords {
-                                HashMap<String, String> map = new HashMap<>();
-                                CheckedWordsTableModel(int capacity) {
-                                    super(capacity);
-                                }
-                                public boolean containsKey(WordsPair wordsPair) {
-                                    return map.containsKey(wordsPair.eng);
-                                }
-                                public  boolean containsValue(WordsPair wordsPair) {
-                                    return map.containsValue(wordsPair.rus);
-                                }
-                                @Override
-                                public void addRow(WordsPair wordsPair) {
-                                    super.addRow(wordsPair);
-                                    map.put(wordsPair.eng, wordsPair.rus);
-                                }
-                                public void removeRow(WordsPair wordsPair, int index) {
-                                    removeRow(index);
-                                    map.remove(wordsPair.eng);
-                                }
-                                public ArrayList<WordsPair> getCells() {
-                                    return cells;
-                                }
-                                public HashMap<String, String> getMap() {
-                                    return map;
-                                }
-                            }
                             class PanelVocab extends JPanel {
-                                PanelVocab(CheckedWordsTableModel trainingTableModel) {
+                                PanelVocab() {
                                     super(new GridBagLayout());
-                                    JTable vocabTable = new JTable(tableModelVocabulary);
+                                    vocabTable = new JTable();
                                     vocabTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
                                     JScrollPane jsp = new JScrollPane(vocabTable);
                                     jsp.setPreferredSize(new Dimension(240, 160));
-                                    JTable trainingTable = new JTable(trainingTableModel);
+                                    trainingTable = new JTable(tableModelTraining);
                                     JScrollPane jsp2 = new JScrollPane(trainingTable);
                                     jsp2.setPreferredSize(new Dimension(240, 160));
                                     GridBagConstraints c = new GridBagConstraints();
@@ -277,13 +276,13 @@ public class GuiMain {
                                     add(jsp2, c);
                                     c.gridx = 0;
                                     c.gridy = 3;
+                                    c.gridwidth = 3;
                                     c.gridwidth = 5;
                                     c.insets = new Insets(5,0,0,0);
                                     c.gridheight = 1;
                                     add(labelLog, c);
                                     c.gridx = 0;
                                     c.gridy = 4;
-                                    c.gridwidth = 3;
                                     c.insets = new Insets(5,0,0,0);
                                     c.gridheight = 1;
                                     add(buttonTrainingStart, c);
@@ -291,9 +290,9 @@ public class GuiMain {
                                         @Override
                                         public void actionPerformed(ActionEvent e) {
                                             int selectedRow = vocabTable.getSelectedRow();
-                                            if (selectedRow != -1 && trainingTableModel.getRowCount() < 5
-                                                    && !trainingTableModel.containsKey(tableModelVocabulary.getRow(selectedRow))) {
-                                                if (trainingTableModel.containsValue(tableModelVocabulary.getRow(selectedRow))) {
+                                            if (selectedRow != -1 && tableModelTraining.getRowCount() < 5
+                                                    && !tableModelTraining.containsKey(tableModelVocabulary.getRow(selectedRow))) {
+                                                if (tableModelTraining.containsValue(tableModelVocabulary.getRow(selectedRow))) {
                                                     labelLog.setText("Нельзя тренировать слова с одинаковым переводом");
                                                     new Thread(new Runnable() {
                                                         @Override
@@ -307,10 +306,10 @@ public class GuiMain {
                                                     }).start();
                                                     return;
                                                 }
-                                                trainingTableModel.addRow(tableModelVocabulary.getRow(selectedRow));
+                                                tableModelTraining.addRow(tableModelVocabulary.getRow(selectedRow));
                                                 int nextSelect = (selectedRow < tableModelVocabulary.getRowCount() - 1 ? selectedRow + 1 : 0);
                                                 vocabTable.setRowSelectionInterval(nextSelect, nextSelect);
-                                                buttonTrainingStart.setEnabled(trainingTableModel.getRowCount() == 5);
+                                                buttonTrainingStart.setEnabled(tableModelTraining.getRowCount() == 5);
                                             }
                                         }
                                     });
@@ -319,26 +318,26 @@ public class GuiMain {
                                         public void actionPerformed(ActionEvent e) {
                                             int selectedRow = trainingTable.getSelectedRow();
                                             if (selectedRow != -1) {
-                                                trainingTableModel.removeRow(trainingTableModel.getRow(selectedRow), selectedRow);
-                                                if (trainingTableModel.getRowCount() != 0) {
-                                                    int nextSelect = (selectedRow == trainingTableModel.getRowCount() ? selectedRow - 1 : selectedRow);
+                                                tableModelTraining.removeRow(tableModelTraining.getRow(selectedRow), selectedRow);
+                                                if (tableModelTraining.getRowCount() != 0) {
+                                                    int nextSelect = (selectedRow == tableModelTraining.getRowCount() ? selectedRow - 1 : selectedRow);
                                                     trainingTable.setRowSelectionInterval(nextSelect, nextSelect);
                                                 }
-                                                buttonTrainingStart.setEnabled(trainingTableModel.getRowCount() == 5);
+                                                buttonTrainingStart.setEnabled(tableModelTraining.getRowCount() == 5);
                                             }
                                         }
                                     });
                                     buttonTrainingStart.addActionListener(new ActionListener() {
                                         @Override
                                         public void actionPerformed(ActionEvent e) {
-                                            trainingLogic = new TrainingLogic(trainingTableModel.getCells());
+                                            trainingLogic = new TrainingLogic(tableModelTraining.getCells());
                                             labelAskedWord.setText(trainingLogic.getCurrentAskedWord());
                                             CardLayout cl = (CardLayout)(AfterAuthPanel.this.getLayout());
                                             cl.show(AfterAuthPanel.this, "training");
                                         }
                                     });
                                 }
-                            };
+                            }
                             class PanelNewWordAddition extends JPanel {
                                 PanelNewWordAddition() {
                                     super(new GridBagLayout());
@@ -409,7 +408,7 @@ public class GuiMain {
                                     c.gridwidth = 3;
                                     add(labelLog, c);
                                 }
-                            };
+                            }
                             class PanelWordRemoval extends JPanel {
                                 PanelWordRemoval() {
                                     super(new GridBagLayout());
@@ -470,12 +469,156 @@ public class GuiMain {
                                     c.gridwidth = 3;
                                     add(labelLog, c);
                                 }
-                            };
-                            tableModelVocabulary = new TableModelWords();
-                            CheckedWordsTableModel tableModelTraining = new CheckedWordsTableModel(AMOUNT_OF_WORDS_FOR_TRAINING);
-                            add(new PanelVocab(tableModelTraining), "Показать словарь");
+                            }
+                            class PanelAccountDeletion extends JPanel {
+                                PanelAccountDeletion(){
+                                    super(new GridBagLayout());
+                                    JLabel labelNick = new JLabel("Ваш никнейм:");
+                                    labelNickValue = new JLabel("");
+                                    labelNickValue.setPreferredSize(new Dimension(220, 20));
+                                    JLabel labelPass = new JLabel("Ваш пароль:");
+                                    JPasswordField passwordField = new JPasswordField();
+                                    passwordField.setPreferredSize(new Dimension(220, 20));
+                                    passwordField.setDocument(new JTextFieldLimit(20));
+                                    JRadioButton radioButtonKeepVocabulary = new JRadioButton("Оставить словарь?");
+                                    JButton buttonDelete = new JButton("Удалить");
+                                    JLabel labelLog = new JLabel();
+                                    labelLog.setHorizontalAlignment(SwingConstants.CENTER);
+                                    labelLog.setVerticalAlignment(SwingConstants.CENTER);
+                                    labelLog.setPreferredSize(new Dimension(220, 40));
+                                    labelLog.setForeground(Color.red);
+                                    GridBagConstraints c = new GridBagConstraints();
+                                    c.gridx = 0;
+                                    c.gridy = 0;
+                                    c.anchor = GridBagConstraints.LINE_START;
+                                    c.insets = new Insets(5,0,5,0);
+                                    add(labelNick, c);
+                                    c.gridy = 1;
+                                    c.gridwidth = 2;
+                                    add(labelNickValue, c);
+                                    c.insets = new Insets(10,0,5,0);
+                                    c.gridy = 2;
+                                    c.gridwidth = 1;
+                                    add(labelPass, c);
+                                    c.insets = new Insets(5,0,5,0);
+                                    c.gridy = 3;
+                                    c.gridwidth = 2;
+                                    add(passwordField, c);
+                                    c.insets = new Insets(5,0,5,0);
+                                    c.gridy = 4;
+                                    c.gridwidth = 1;
+                                    add(radioButtonKeepVocabulary, c);
+                                    c.insets = new Insets(10,0,5,0);
+                                    c.gridy = 5;
+                                    c.gridwidth = 1;
+                                    add(buttonDelete, c);
+                                    c.gridy = 6;
+                                    c.gridwidth = 3;
+                                    c.anchor = GridBagConstraints.CENTER;
+                                    add(labelLog, c);
+                                    buttonDelete.addActionListener(new ActionListener() {
+                                        @Override
+                                        public void actionPerformed(ActionEvent e) {
+                                            String password = new String(passwordField.getPassword());
+                                            labelLog.setForeground(Color.red);
+                                            labelLog.setText("");
+                                            if (nickname.equals("") || password.equals("")) {
+                                                labelLog.setText("<html>Пароль и логин<br> не могут быть пусты!</html>");
+                                                return;
+                                            }
+                                            String actualPass = accounts.get(nickname);
+                                            if (actualPass == null)
+                                                labelLog.setText("<html>Такого пользователя<br>не существует</html>");
+                                            else if (!actualPass.equals(password))
+                                                labelLog.setText("Неправильный пароль");
+                                            else {
+                                                if(radioButtonKeepVocabulary.isSelected()) {
+                                                    keepVocabulary = true;
+                                                    labelDecision.setText("<html>Вы уверены, что хотите удалить ваш аккаунт?<br>Словарь удален не будет</html>");
+                                                }
+                                                else {
+                                                    keepVocabulary = false;
+                                                    labelDecision.setText("<html>Вы уверены, что хотите удалить ваш аккаунт<br>и словарь?</html>");
+                                                }
+                                                CardLayout cl = (CardLayout)(PanelMenuInner.this.getLayout());
+                                                cl.show(PanelMenuInner.this, "Подтвердить удаление");
+                                                passwordField.setText("");
+                                                radioButtonKeepVocabulary.setSelected(false);
+                                            }
+                                        }
+                                    });
+                                }
+                            }
+                            class PanelConfirmDeletion extends JPanel {
+                                PanelConfirmDeletion(){
+                                    super(new GridBagLayout());
+                                    labelDecision = new JLabel("");
+                                    labelDecision.setPreferredSize(new Dimension(200, 60));
+                                    JButton buttonYes = new JButton("Да");
+                                    JButton buttonNo = new JButton("Нет");
+                                    JLabel labelLog = new JLabel();
+                                    labelLog.setHorizontalAlignment(SwingConstants.CENTER);
+                                    labelLog.setVerticalAlignment(SwingConstants.CENTER);
+                                    labelLog.setPreferredSize(new Dimension(220, 40));
+                                    labelLog.setForeground(Color.red);
+                                    GridBagConstraints c = new GridBagConstraints();
+                                    c.gridx = 0;
+                                    c.gridy = 0;
+                                    c.gridwidth = 3;
+                                    c.anchor = GridBagConstraints.LINE_START;
+                                    c.insets = new Insets(0,0,10,0);
+                                    add(labelDecision, c);
+                                    c.gridx = 0;
+                                    c.gridy = 1;
+                                    c.gridwidth = 1;
+                                    c.insets = new Insets(0,0,0,10);
+                                    add(buttonYes, c);
+                                    c.gridx = 2;
+                                    c.insets = new Insets(0,10,0,0);
+                                    add(buttonNo, c);
+                                    buttonYes.addActionListener(new ActionListener() {
+                                        @Override
+                                        public void actionPerformed(ActionEvent e) {
+                                            labelLog.setForeground(Color.green);
+                                            labelLog.setText("Успех!");
+                                            buttonYes.setEnabled(false);
+                                            buttonNo.setEnabled(false);
+                                            db.removeAccount(nickname);
+                                            accounts.remove(nickname);
+                                            if (!keepVocabulary)
+                                                db.deleteUserTable(nickname);
+                                            new Thread(new Runnable() {
+                                                @Override
+                                                public void run(){
+                                                    try {
+                                                        Thread.sleep(1000);
+                                                        CardLayout cl = (CardLayout)(mainPanel.getLayout());
+                                                        cl.show(mainPanel, "Authorization");
+                                                        cl = (CardLayout)(PanelMenuInner.this.getLayout());
+                                                        cl.show(PanelMenuInner.this, "Показать словарь");
+                                                        buttonYes.setEnabled(true);
+                                                        buttonNo.setEnabled(true);
+                                                    } catch (InterruptedException e) {
+                                                        e.printStackTrace();
+                                                    }
+                                                }
+                                            }).start();
+                                        }
+                                    });
+                                    buttonNo.addActionListener(new ActionListener() {
+                                        @Override
+                                        public void actionPerformed(ActionEvent actionEvent) {
+                                            CardLayout cl = (CardLayout)(PanelMenuInner.this.getLayout());
+                                            cl.show(PanelMenuInner.this, "Удалить аккаунт");
+                                        }
+                                    });
+                                }
+                            }
+                            add(new PanelVocab(), "Показать словарь");
                             add(new PanelNewWordAddition(), "Добавить слово");
                             add(new PanelWordRemoval(), "Удалить слово");
+                            add(new PanelAccountDeletion(), "Удалить аккаунт");
+                            add(new PanelConfirmDeletion(), "Подтвердить удаление");
                         }
                     }
                     class FunctionToolbar extends JToolBar {
@@ -483,9 +626,11 @@ public class GuiMain {
                             JButton buttonShowNewOwnWordAddition = new JButton("Добавить слово");
                             JButton buttonShowVocab = new JButton("Показать словарь");
                             JButton buttonShowWordRemoval = new JButton("Удалить слово");
+                            JButton buttonShowAccountDeletion = new JButton("Удалить аккаунт");
                             add(buttonShowVocab);
                             add(buttonShowNewOwnWordAddition);
                             add(buttonShowWordRemoval);
+                            add(buttonShowAccountDeletion);
                             class ToolBarInteract implements ActionListener {
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
@@ -496,6 +641,7 @@ public class GuiMain {
                             buttonShowNewOwnWordAddition.addActionListener(new ToolBarInteract());
                             buttonShowVocab.addActionListener(new ToolBarInteract());
                             buttonShowWordRemoval.addActionListener(new ToolBarInteract());
+                            buttonShowAccountDeletion.addActionListener(new ToolBarInteract());
                         }
                     }
                     PanelMenuInner panelMenuInner = new PanelMenuInner();

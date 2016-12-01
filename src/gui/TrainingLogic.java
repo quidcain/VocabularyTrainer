@@ -92,6 +92,5 @@ class TrainingLogic {
                 }
         }
         return result;
-
     }
 }
