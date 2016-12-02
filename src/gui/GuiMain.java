@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 
 /**
@@ -226,6 +227,7 @@ public class GuiMain {
     private class AfterAuthPanel extends JPanel {
         private TrainingLogic trainingLogic;
         private JLabel labelAskedWord; //here because it's need to load word while starting training
+        private JRadioButton[] radioOptions = new JRadioButton[4];
         AfterAuthPanel() {
             super(new CardLayout());
             class PanelMenu extends JPanel {
@@ -332,6 +334,9 @@ public class GuiMain {
                                         public void actionPerformed(ActionEvent e) {
                                             trainingLogic = new TrainingLogic(tableModelTraining.getCells());
                                             labelAskedWord.setText(trainingLogic.getCurrentAskedWord());
+                                            String[] options = trainingLogic.getOptions();
+                                            for (int i = 0; i < 4; ++i)
+                                                radioOptions[i].setText(options[i]);
                                             CardLayout cl = (CardLayout)(AfterAuthPanel.this.getLayout());
                                             cl.show(AfterAuthPanel.this, "training");
                                         }
@@ -651,8 +656,139 @@ public class GuiMain {
             }
             class PanelTraining extends JPanel {
                 private JLabel labelResult;
+                private JLabel labelAskedWord;
                 PanelTraining() {
                     super(new CardLayout());
+                    class PanelTrainingPickWord extends JPanel {
+                        PanelTrainingPickWord() {
+                            super(new GridBagLayout());
+                            AfterAuthPanel.this.labelAskedWord = new JLabel("Известное слово");
+                            for (int i = 0; i < 4; ++i) {
+                                radioOptions[i] = new JRadioButton();
+                                radioOptions[i].setPreferredSize(new Dimension(140, 40));
+                            }
+                            ButtonGroup buttonGroup = new ButtonGroup();
+                            for (int i = 0; i < 4; ++i)
+                                buttonGroup.add(radioOptions[i]);
+                            JButton buttonAnswer = new JButton("Ответить");
+                            JLabel labelLog = new JLabel("");
+                            labelLog.setPreferredSize(new Dimension(120, 20));
+                            labelLog.setHorizontalAlignment(SwingConstants.CENTER);
+                            labelLog.setVerticalAlignment(SwingConstants.CENTER);
+                            labelLog.setForeground(Color.red);
+                            GridBagConstraints c = new GridBagConstraints();
+                            JPanel radioPanel = new JPanel(new GridBagLayout());
+                            c.gridx = 0;
+                            c.gridy = 0;
+                            radioPanel.add(radioOptions[0], c);
+                            c.gridx = 1;
+                            c.gridy = 0;
+                            radioPanel.add(radioOptions[1], c);
+                            c.gridx = 0;
+                            c.gridy = 1;
+                            radioPanel.add(radioOptions[2], c);
+                            c.gridx = 1;
+                            c.gridy = 1;
+                            radioPanel.add(radioOptions[3], c);
+                            c.gridx = 0;
+                            c.gridy = 0;
+                            c.anchor = GridBagConstraints.CENTER;
+                            c.insets = new Insets(5, 0, 5, 0);
+                            add(AfterAuthPanel.this.labelAskedWord, c);
+                            c.gridy = 1;
+                            add(radioPanel, c);
+                            c.gridy = 2;
+                            add(buttonAnswer, c);
+                            c.gridy = 3;
+                            add(labelLog, c);
+                            /*c.gridx = 2;
+                            c.gridy = 0;
+                            c.anchor = GridBagConstraints.CENTER;
+                            c.gridwidth = 3;
+                            c.insets = new Insets(5, 0, 5, 0);
+                            add(AfterAuthPanel.this.labelAskedWord, c);
+                            c.gridx = 0;
+                            c.gridy = 1;
+                            add(radioOptions[0], c);
+                            c.gridx = 4;
+                            c.gridy = 1;
+                            add(radioOptions[1], c);
+                            c.gridx = 0;
+                            c.gridy = 2;
+                            add(radioOptions[2], c);
+                            c.gridx = 4;
+                            c.gridy = 2;
+                            add(radioOptions[3], c);
+                            c.gridx = 2;
+                            c.gridy = 3;
+                            add(buttonAnswer, c);
+                            c.gridx = 2;
+                            c.gridy = 4;
+                            add(labelLog, c);*/
+                            /*c.gridx = 1;
+                            c.gridy = 0;
+                            c.anchor = GridBagConstraints.CENTER;
+                            c.insets = new Insets(5, 0, 5, 0);
+                            add(AfterAuthPanel.this.labelAskedWord, c);
+                            c.gridx = 0;
+                            c.gridy = 1;
+                            add(radioOptions[0], c);
+                            c.gridx = 2;
+                            c.gridy = 1;
+                            add(radioOptions[1], c);
+                            c.gridx = 0;
+                            c.gridy = 2;
+                            add(radioOptions[2], c);
+                            c.gridx = 2;
+                            c.gridy = 2;
+                            add(radioOptions[3], c);
+                            c.gridx = 1;
+                            c.gridy = 3;
+                            add(buttonAnswer, c);
+                            c.gridx = 1;
+                            c.gridy = 4;
+                            add(labelLog, c);*/
+                            buttonAnswer.addActionListener(new ActionListener() {
+                                @Override
+                                public void actionPerformed(ActionEvent e) {
+                                    labelLog.setForeground(Color.red);
+                                    Enumeration<AbstractButton> allRadioButtons = buttonGroup.getElements();
+                                    while(allRadioButtons.hasMoreElements())
+                                    {
+                                        JRadioButton temp = (JRadioButton)allRadioButtons.nextElement();
+                                        if(temp.isSelected())
+                                            if (trainingLogic.isCorrectTranslation(temp.getActionCommand())){
+                                                labelLog.setForeground(Color.green);
+                                                labelLog.setText("Верно!");
+                                            } else
+                                                labelLog.setText("Не верно!");
+                                        temp.setSelected(false);
+                                    }
+                                    buttonGroup.clearSelection();
+                                    new Thread(new Runnable() {
+                                        @Override
+                                        public void run(){
+                                            try {
+                                                Thread.sleep(500);
+                                                labelLog.setText("");
+                                            } catch (InterruptedException e) {
+                                            }
+                                        }
+                                    }).start();
+                                    if (trainingLogic.isIntermediateStage()) {
+                                        labelAskedWord.setText(trainingLogic.getCurrentAskedWord());
+                                        CardLayout cl = (CardLayout)(PanelTraining.this.getLayout());
+                                        cl.next(PanelTraining.this);
+                                    } else {
+                                        AfterAuthPanel.this.labelAskedWord.setText(trainingLogic.getCurrentAskedWord());
+                                        String[] options = trainingLogic.getOptions();
+                                        for (int i = 0; i < 4; ++i)
+                                            radioOptions[i].setText(options[i]);
+                                    }
+                                }
+                            });
+                        }
+                    }
                     class PanelTrainingWriteWord extends JPanel {
                         protected JButton buttonAnswer;
                         protected JLabel labelLog;
@@ -753,6 +889,7 @@ public class GuiMain {
                             });
                         }
                     }
+                    add(new PanelTrainingPickWord(), "pickWord");
                     add(new PanelTrainingWriteWord(), "writeWord");
                     add(new PanelTrainingResult(), "result");
                 }

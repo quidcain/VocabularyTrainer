@@ -7,11 +7,11 @@ import java.util.*;
  */
 class TrainingLogic {
     private ArrayList<WordsPair> arrayList;
-    private static final int lastStage = 3;
+    private static final int resultStage = 4;
     private int currentIndex = 0;
     private int correctAnswers = 0;
     private int totalQuestions = 0;
-    private int stage = 1;
+    private int stage = 0;
     private void shuffle() {
         Collections.shuffle(arrayList);
         currentIndex = 0;
@@ -21,14 +21,14 @@ class TrainingLogic {
         shuffle();
     }
     public String getCurrentAskedWord() {
-        if (stage % 2 == 1)
+        if (stage % 2 == 0)
             return arrayList.get(currentIndex).eng;
         else
             return arrayList.get(currentIndex).rus;
     }
     public boolean isCorrectTranslation(String translation) {
         boolean result = false;
-        if (stage % 2 == 1)
+        if (stage % 2 == 0)
             result = translation.equals(arrayList.get(currentIndex).rus);
         else
             result = translation.equals(arrayList.get(currentIndex).eng);
@@ -48,7 +48,7 @@ class TrainingLogic {
         }
     }
     public boolean isIntermediateStage() {
-        if (isStageComplete() && stage == lastStage)
+        if (isStageComplete() && stage % 2 == 0)
             return true;
         else
             return false;
@@ -61,10 +61,10 @@ class TrainingLogic {
     }
     public String[] getOptions() {
         String[] result = new String[4];
-        int correctOption = new Random().nextInt(4) + 1;
+        int correctOption = new Random().nextInt(4);
         HashSet<String> setOptions = new HashSet<>();
-        if (stage % 2 == 1) {
-            setOptions.add(arrayList.get(correctOption).rus);
+        if (stage % 2 == 0) {
+            setOptions.add(arrayList.get(currentIndex).rus);
             for (int i = 0; i < 4; ++i)
                 if (i == correctOption)
                     result[i] = arrayList.get(currentIndex).rus;
@@ -78,7 +78,7 @@ class TrainingLogic {
                 }
         }
         else {
-            setOptions.add(arrayList.get(correctOption).eng);
+            setOptions.add(arrayList.get(currentIndex).eng);
             for (int i = 0; i < 4; ++i)
                 if (i == correctOption)
                     result[i] = arrayList.get(currentIndex).eng;
