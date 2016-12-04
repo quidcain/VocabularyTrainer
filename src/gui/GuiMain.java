@@ -28,7 +28,7 @@ public class GuiMain {
             super(new GridBagLayout());
             class TabbedPaneLogSign extends JTabbedPane{
                 TabbedPaneLogSign() {
-                    JTextFieldLimit limitNick = new JTextFieldLimit(20);
+                    JTextFieldLimit limitNick = new JTextFieldLimit(30);
                     class PanelLogin extends JPanel {
                         PanelLogin(JTextFieldLimit nickLimit){
                             super(new GridBagLayout());
@@ -39,7 +39,7 @@ public class GuiMain {
                             JLabel labelPass = new JLabel("Ваш пароль:");
                             JPasswordField passwordField = new JPasswordField();
                             passwordField.setPreferredSize(new Dimension(220, 20));
-                            passwordField.setDocument(new JTextFieldLimit(20));
+                            passwordField.setDocument(new JTextFieldLimit(30));
                             JButton buttonLogin = new JButton("Войти");
                             JLabel labelLog = new JLabel();
                             labelLog.setHorizontalAlignment(SwingConstants.CENTER);
@@ -130,11 +130,11 @@ public class GuiMain {
                             JLabel labelPass = new JLabel("Ваш пароль:");
                             JTextField textFieldPass = new JTextField();
                             textFieldPass.setPreferredSize(new Dimension(220, 20));
-                            textFieldPass.setDocument(new JTextFieldLimit(20));
+                            textFieldPass.setDocument(new JTextFieldLimit(30));
                             JLabel labelRepeatPass = new JLabel("Повторите пароль:");
                             JTextField textFieldRepeatPass = new JTextField();
                             textFieldRepeatPass.setPreferredSize(new Dimension(220, 20));
-                            textFieldRepeatPass.setDocument(new JTextFieldLimit(20));
+                            textFieldRepeatPass.setDocument(new JTextFieldLimit(30));
                             JButton buttonSignUp = new JButton("Зарегистрироваться");
                             JLabel labelLog = new JLabel();
                             labelLog.setPreferredSize(new Dimension(220, 40));
@@ -471,6 +471,8 @@ public class GuiMain {
                                                     } catch (InterruptedException e1) {
                                                         e1.printStackTrace();
                                                     }
+                                                    textFieldEng.setText("");
+                                                    textFieldRus.setText("");
                                                     labelLog.setForeground(Color.red);
                                                     labelLog.setText("");
                                                 }
@@ -516,6 +518,7 @@ public class GuiMain {
                                                     } catch (InterruptedException e1) {
                                                         //it can't happen
                                                     }
+                                                    textFieldEng.setText("");
                                                     labelLog.setForeground(Color.red);
                                                     labelLog.setText("");
                                                 }
@@ -549,7 +552,7 @@ public class GuiMain {
                                     JLabel labelPass = new JLabel("Ваш пароль:");
                                     JPasswordField passwordField = new JPasswordField();
                                     passwordField.setPreferredSize(new Dimension(220, 20));
-                                    passwordField.setDocument(new JTextFieldLimit(20));
+                                    passwordField.setDocument(new JTextFieldLimit(30));
                                     JRadioButton radioButtonKeepVocabulary = new JRadioButton("Оставить словарь?");
                                     JButton buttonDelete = new JButton("Удалить");
                                     JLabel labelLog = new JLabel();
