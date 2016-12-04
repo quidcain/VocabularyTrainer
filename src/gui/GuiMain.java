@@ -107,7 +107,7 @@ public class GuiMain {
                                             public void run(){
                                                 try {
                                                     Thread.sleep(1000);
-                                                    frame.setMinimumSize(new Dimension(700, 330));
+                                                    frame.setMinimumSize(new Dimension(750, 330));
                                                     passwordField.setText("");
                                                     labelLog.setText("");
                                                 } catch (InterruptedException e) {
@@ -244,10 +244,10 @@ public class GuiMain {
                                     vocabTable = new JTable();
                                     vocabTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
                                     JScrollPane jsp = new JScrollPane(vocabTable);
-                                    jsp.setPreferredSize(new Dimension(240, 160));
+                                    jsp.setPreferredSize(new Dimension(260, 160));
                                     trainingTable = new JTable(tableModelTraining);
                                     JScrollPane jsp2 = new JScrollPane(trainingTable);
-                                    jsp2.setPreferredSize(new Dimension(240, 160));
+                                    jsp2.setPreferredSize(new Dimension(260, 160));
                                     GridBagConstraints c = new GridBagConstraints();
                                     JButton buttonRight = new JButton("-->");
                                     JButton buttonLeft = new JButton("<--");
@@ -349,11 +349,11 @@ public class GuiMain {
                                     JLabel labelEng = new JLabel("Слово на английском:");
                                     JTextField textFieldEng = new JTextField();
                                     textFieldEng.setPreferredSize(new Dimension(220, 20));
-                                    textFieldEng.setDocument(new JTextFieldLimit(20));
+                                    textFieldEng.setDocument(new JTextFieldLimit(30));
                                     JLabel labelRus = new JLabel("Его перевод:");
                                     JTextField textFieldRus = new JTextField();
                                     textFieldRus.setPreferredSize(new Dimension(220, 20));
-                                    textFieldRus.setDocument(new JTextFieldLimit(20));
+                                    textFieldRus.setDocument(new JTextFieldLimit(30));
                                     JButton buttonAdd = new JButton("Добавить");
                                     JLabel labelLog = new JLabel();
                                     labelLog.setPreferredSize(new Dimension(220, 20));
@@ -361,15 +361,15 @@ public class GuiMain {
                                     buttonAdd.addActionListener(new ActionListener() {
                                         @Override
                                         public void actionPerformed(ActionEvent e) {
-                                            if (textFieldEng.getText().equals("") || textFieldRus.getText().equals("")) {
+                                            String eng = textFieldEng.getText().trim().replaceAll("\\s+", " ");
+                                            String rus = textFieldRus.getText().trim().replaceAll("\\s+", " ");
+                                            if (eng.equals("") || rus.equals("")) {
                                                 labelLog.setText("Поля не могут быть пустыми");
-                                            } else if (entireSessionVocabulary.containsKey(textFieldEng.getText())) {
+                                            } else if (entireSessionVocabulary.containsKey(eng)) {
                                                 labelLog.setText("Слово уже есть в словаре!");
                                             } else {
                                                 labelLog.setForeground(Color.green);
                                                 labelLog.setText("Добавлено");
-                                                String eng = textFieldEng.getText();
-                                                String rus = textFieldRus.getText();
                                                 entireSessionVocabulary.put(eng, rus);
                                                 tableModelVocabulary.addRow(new WordsPair(eng, rus));
                                                 db.addWord(nickname, eng, rus);
@@ -420,7 +420,7 @@ public class GuiMain {
                                     JLabel labelEng = new JLabel("Слово на английском:");
                                     JTextField textFieldEng = new JTextField();
                                     textFieldEng.setPreferredSize(new Dimension(220, 20));
-                                    textFieldEng.setDocument(new JTextFieldLimit(20));
+                                    textFieldEng.setDocument(new JTextFieldLimit(30));
                                     JButton buttonRemove = new JButton("Удалить");
                                     JLabel labelLog = new JLabel();
                                     labelLog.setPreferredSize(new Dimension(220, 20));
@@ -428,14 +428,14 @@ public class GuiMain {
                                     buttonRemove.addActionListener(new ActionListener() {
                                         @Override
                                         public void actionPerformed(ActionEvent e) {
-                                            if (textFieldEng.getText().equals("")) {
+                                            String eng = textFieldEng.getText().trim().replaceAll("\\s+", " ");
+                                            if (eng.equals("")) {
                                                 labelLog.setText("Поле не может быть пустым");
-                                            } else if (!entireSessionVocabulary.containsKey(textFieldEng.getText())) {
+                                            } else if (!entireSessionVocabulary.containsKey(eng)) {
                                                 labelLog.setText("Такого слова нет в словаре!");
                                             } else {
                                                 labelLog.setForeground(Color.green);
                                                 labelLog.setText("Удалено");
-                                                String eng = textFieldEng.getText();
                                                 entireSessionVocabulary.remove(textFieldEng.getText());
                                                 for (int i = 0; i < tableModelVocabulary.getRowCount(); ++i)
                                                     if (tableModelVocabulary.getRow(i).eng.equals(textFieldEng.getText())) {
@@ -701,53 +701,6 @@ public class GuiMain {
                             add(buttonAnswer, c);
                             c.gridy = 3;
                             add(labelLog, c);
-                            /*c.gridx = 2;
-                            c.gridy = 0;
-                            c.anchor = GridBagConstraints.CENTER;
-                            c.gridwidth = 3;
-                            c.insets = new Insets(5, 0, 5, 0);
-                            add(AfterAuthPanel.this.labelAskedWord, c);
-                            c.gridx = 0;
-                            c.gridy = 1;
-                            add(radioOptions[0], c);
-                            c.gridx = 4;
-                            c.gridy = 1;
-                            add(radioOptions[1], c);
-                            c.gridx = 0;
-                            c.gridy = 2;
-                            add(radioOptions[2], c);
-                            c.gridx = 4;
-                            c.gridy = 2;
-                            add(radioOptions[3], c);
-                            c.gridx = 2;
-                            c.gridy = 3;
-                            add(buttonAnswer, c);
-                            c.gridx = 2;
-                            c.gridy = 4;
-                            add(labelLog, c);*/
-                            /*c.gridx = 1;
-                            c.gridy = 0;
-                            c.anchor = GridBagConstraints.CENTER;
-                            c.insets = new Insets(5, 0, 5, 0);
-                            add(AfterAuthPanel.this.labelAskedWord, c);
-                            c.gridx = 0;
-                            c.gridy = 1;
-                            add(radioOptions[0], c);
-                            c.gridx = 2;
-                            c.gridy = 1;
-                            add(radioOptions[1], c);
-                            c.gridx = 0;
-                            c.gridy = 2;
-                            add(radioOptions[2], c);
-                            c.gridx = 2;
-                            c.gridy = 2;
-                            add(radioOptions[3], c);
-                            c.gridx = 1;
-                            c.gridy = 3;
-                            add(buttonAnswer, c);
-                            c.gridx = 1;
-                            c.gridy = 4;
-                            add(labelLog, c);*/
                             buttonAnswer.addActionListener(new ActionListener() {
                                 @Override
                                 public void actionPerformed(ActionEvent e) {

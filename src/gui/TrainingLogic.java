@@ -7,7 +7,6 @@ import java.util.*;
  */
 class TrainingLogic {
     private ArrayList<WordsPair> arrayList;
-    private static final int resultStage = 4;
     private int currentIndex = 0;
     private int correctAnswers = 0;
     private int totalQuestions = 0;
