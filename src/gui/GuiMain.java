@@ -4,7 +4,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 
@@ -19,9 +18,9 @@ public class GuiMain {
     private Database db;
     private HashMap<String, String> accounts;
     private HashMap<String, String> entireSessionVocabulary;
-    private JTable vocabTable;
+    private JTable tableVocab;
     private TableModelWords tableModelVocabulary;
-    private JTable trainingTable;
+    private JTable tableTraining;
     private CheckedWordsTableModel tableModelTraining;
     private JLabel labelNickValue;
     private class AuthorizationPanel extends JPanel {
@@ -47,7 +46,6 @@ public class GuiMain {
                             labelLog.setVerticalAlignment(SwingConstants.CENTER);
                             labelLog.setPreferredSize(new Dimension(220, 40));
                             labelLog.setForeground(Color.red);
-
                             GridBagConstraints c = new GridBagConstraints();
                             c.gridx = 0;
                             c.gridy = 0;
@@ -74,7 +72,6 @@ public class GuiMain {
                             c.weighty = 1;
                             c.anchor = GridBagConstraints.CENTER;
                             add(labelLog, c);
-
                             buttonLogin.addActionListener(new ActionListener() {
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
@@ -98,16 +95,16 @@ public class GuiMain {
                                         entireSessionVocabulary = db.getVocabulary(nickname);
                                         tableModelVocabulary = new TableModelWords();
                                         tableModelVocabulary.setCells(entireSessionVocabulary);
-                                        vocabTable.setModel(tableModelVocabulary);
+                                        tableVocab.setModel(tableModelVocabulary);
                                         tableModelTraining = new CheckedWordsTableModel(AMOUNT_OF_WORDS_FOR_TRAINING);
-                                        trainingTable.setModel(tableModelTraining);
+                                        tableTraining.setModel(tableModelTraining);
                                         labelNickValue.setText(nickname);
                                         new Thread(new Runnable() {
                                             @Override
                                             public void run(){
                                                 try {
                                                     Thread.sleep(1000);
-                                                    frame.setMinimumSize(new Dimension(750, 330));
+                                                    frame.setMinimumSize(new Dimension(765, 330));
                                                     passwordField.setText("");
                                                     labelLog.setText("");
                                                 } catch (InterruptedException e) {
@@ -226,7 +223,7 @@ public class GuiMain {
     }
     private class AfterAuthPanel extends JPanel {
         private TrainingLogic trainingLogic;
-        private JLabel labelAskedWord; //here because it's need to load word while starting training
+        private JLabel labelAskedWord;
         private JRadioButton[] radioOptions = new JRadioButton[4];
         AfterAuthPanel() {
             super(new CardLayout());
@@ -241,12 +238,12 @@ public class GuiMain {
                             class PanelVocab extends JPanel {
                                 PanelVocab() {
                                     super(new GridBagLayout());
-                                    vocabTable = new JTable();
-                                    vocabTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-                                    JScrollPane jsp = new JScrollPane(vocabTable);
+                                    tableVocab = new JTable();
+                                    tableVocab.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+                                    JScrollPane jsp = new JScrollPane(tableVocab);
                                     jsp.setPreferredSize(new Dimension(260, 160));
-                                    trainingTable = new JTable(tableModelTraining);
-                                    JScrollPane jsp2 = new JScrollPane(trainingTable);
+                                    tableTraining = new JTable(tableModelTraining);
+                                    JScrollPane jsp2 = new JScrollPane(tableTraining);
                                     jsp2.setPreferredSize(new Dimension(260, 160));
                                     GridBagConstraints c = new GridBagConstraints();
                                     JButton buttonRight = new JButton("-->");
@@ -291,8 +288,12 @@ public class GuiMain {
                                     buttonRight.addActionListener(new ActionListener() {
                                         @Override
                                         public void actionPerformed(ActionEvent e) {
-                                            int selectedRow = vocabTable.getSelectedRow();
-                                            if (selectedRow != -1 && tableModelTraining.getRowCount() < 5
+                                            int selectedRow = tableVocab.getSelectedRow();
+                                            if (selectedRow == -1)
+                                                return;
+                                            int nextSelect = (selectedRow < tableModelVocabulary.getRowCount() - 1 ? selectedRow + 1 : 0);
+                                            tableVocab.setRowSelectionInterval(nextSelect, nextSelect);
+                                            if (tableModelTraining.getRowCount() < 5
                                                     && !tableModelTraining.containsKey(tableModelVocabulary.getRow(selectedRow))) {
                                                 if (tableModelTraining.containsValue(tableModelVocabulary.getRow(selectedRow))) {
                                                     labelLog.setText("Нельзя тренировать слова с одинаковым переводом");
@@ -303,14 +304,13 @@ public class GuiMain {
                                                                 Thread.sleep(2000);
                                                                 labelLog.setText("");
                                                             } catch (InterruptedException e) {
+                                                                //it can't happen
                                                             }
                                                         }
                                                     }).start();
                                                     return;
                                                 }
                                                 tableModelTraining.addRow(tableModelVocabulary.getRow(selectedRow));
-                                                int nextSelect = (selectedRow < tableModelVocabulary.getRowCount() - 1 ? selectedRow + 1 : 0);
-                                                vocabTable.setRowSelectionInterval(nextSelect, nextSelect);
                                                 buttonTrainingStart.setEnabled(tableModelTraining.getRowCount() == 5);
                                             }
                                         }
@@ -318,12 +318,12 @@ public class GuiMain {
                                     buttonLeft.addActionListener(new ActionListener() {
                                         @Override
                                         public void actionPerformed(ActionEvent e) {
-                                            int selectedRow = trainingTable.getSelectedRow();
+                                            int selectedRow = tableTraining.getSelectedRow();
                                             if (selectedRow != -1) {
                                                 tableModelTraining.removeRow(tableModelTraining.getRow(selectedRow), selectedRow);
                                                 if (tableModelTraining.getRowCount() != 0) {
                                                     int nextSelect = (selectedRow == tableModelTraining.getRowCount() ? selectedRow - 1 : selectedRow);
-                                                    trainingTable.setRowSelectionInterval(nextSelect, nextSelect);
+                                                    tableTraining.setRowSelectionInterval(nextSelect, nextSelect);
                                                 }
                                                 buttonTrainingStart.setEnabled(tableModelTraining.getRowCount() == 5);
                                             }
@@ -343,8 +343,73 @@ public class GuiMain {
                                     });
                                 }
                             }
-                            class PanelNewWordAddition extends JPanel {
-                                PanelNewWordAddition() {
+                            class PanelNewTableAddition extends JPanel {
+                                PanelNewTableAddition() {
+                                    super(new GridBagLayout());
+                                    JTable tableGeneralStandard = new JTable();
+                                    tableGeneralStandard.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+                                    TableModelWords tableModelGeneralStandard = new TableModelWords();
+                                    tableModelGeneralStandard.setCells(db.getVocabulary("admin"));
+                                    tableGeneralStandard.setModel(tableModelGeneralStandard);
+                                    JScrollPane jsp = new JScrollPane(tableGeneralStandard);
+                                    jsp.setPreferredSize(new Dimension(260, 160));
+                                    JButton buttonAdd = new JButton("Добавить");
+                                    JLabel labelLog = new JLabel("");
+                                    labelLog.setPreferredSize(new Dimension(220, 20));
+                                    labelLog.setHorizontalAlignment(SwingConstants.CENTER);
+                                    labelLog.setVerticalAlignment(SwingConstants.CENTER);
+                                    labelLog.setForeground(Color.red);
+                                    GridBagConstraints c = new GridBagConstraints();
+                                    c.gridx = 0;
+                                    c.gridy = 0;
+                                    c.gridheight = 5;
+                                    c.insets = new Insets(0, 0, 0, 40);
+                                    add(jsp, c);
+                                    c.insets = new Insets(50, 0, 0, 0);
+                                    c.gridx = 4;
+                                    c.gridy = 1;
+                                    c.gridheight = 1;
+                                    add(buttonAdd, c);
+                                    c.gridy = 2;
+                                    c.insets = new Insets(5, 0, 0, 0);
+                                    add(labelLog, c);
+                                    buttonAdd.addActionListener(new ActionListener() {
+                                        @Override
+                                        public void actionPerformed(ActionEvent e) {
+                                            int selectedRow = tableGeneralStandard.getSelectedRow();
+                                            if (selectedRow != -1) {
+                                                String eng = (String)tableGeneralStandard.getValueAt(selectedRow, 0);
+                                                String rus = (String)tableGeneralStandard.getValueAt(selectedRow, 1);
+                                                if (entireSessionVocabulary.containsKey(eng)) {
+                                                    labelLog.setText("Слово уже есть в словаре!");
+                                                } else {
+                                                    labelLog.setForeground(Color.green);
+                                                    labelLog.setText("Добавлено");
+                                                    entireSessionVocabulary.put(eng, rus);
+                                                    tableModelVocabulary.addRow(new WordsPair(eng, rus));
+                                                    db.addWord(nickname, eng, rus);
+                                                }
+                                                new Thread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        try {
+                                                            Thread.sleep(1000);
+                                                        } catch (InterruptedException e1) {
+                                                            //it can't happen
+                                                        }
+                                                        labelLog.setForeground(Color.red);
+                                                        labelLog.setText("");
+                                                    }
+                                                }).start();
+                                                int nextSelect = (selectedRow < tableModelGeneralStandard.getRowCount() - 1 ? selectedRow + 1 : 0);
+                                                tableGeneralStandard.setRowSelectionInterval(nextSelect, nextSelect);
+                                            }
+                                        }
+                                    });
+                                }
+                            }
+                            class PanelNewOwnAddition extends JPanel {
+                                PanelNewOwnAddition() {
                                     super(new GridBagLayout());
                                     JLabel labelEng = new JLabel("Слово на английском:");
                                     JTextField textFieldEng = new JTextField();
@@ -358,6 +423,30 @@ public class GuiMain {
                                     JLabel labelLog = new JLabel();
                                     labelLog.setPreferredSize(new Dimension(220, 20));
                                     labelLog.setForeground(Color.red);
+                                    GridBagConstraints c = new GridBagConstraints();
+                                    c.gridx = 0;
+                                    c.gridy = 0;
+                                    c.anchor = GridBagConstraints.LINE_START;
+                                    c.insets = new Insets(5, 0, 5, 0);
+                                    add(labelEng, c);
+                                    c.gridy = 1;
+                                    c.gridwidth = 2;
+                                    add(textFieldEng, c);
+                                    c.insets = new Insets(10, 0, 5, 0);
+                                    c.gridy = 2;
+                                    c.gridwidth = 1;
+                                    add(labelRus, c);
+                                    c.insets = new Insets(5, 0, 5, 0);
+                                    c.gridy = 3;
+                                    c.gridwidth = 2;
+                                    add(textFieldRus, c);
+                                    c.insets = new Insets(10, 0, 5, 0);
+                                    c.gridy = 4;
+                                    c.gridwidth = 1;
+                                    add(buttonAdd, c);
+                                    c.gridy = 5;
+                                    c.gridwidth = 3;
+                                    add(labelLog, c);
                                     buttonAdd.addActionListener(new ActionListener() {
                                         @Override
                                         public void actionPerformed(ActionEvent e) {
@@ -388,30 +477,6 @@ public class GuiMain {
                                             }).start();
                                         }
                                     });
-                                    GridBagConstraints c = new GridBagConstraints();
-                                    c.gridx = 0;
-                                    c.gridy = 0;
-                                    c.anchor = GridBagConstraints.LINE_START;
-                                    c.insets = new Insets(5, 0, 5, 0);
-                                    add(labelEng, c);
-                                    c.gridy = 1;
-                                    c.gridwidth = 2;
-                                    add(textFieldEng, c);
-                                    c.insets = new Insets(10, 0, 5, 0);
-                                    c.gridy = 2;
-                                    c.gridwidth = 1;
-                                    add(labelRus, c);
-                                    c.insets = new Insets(5, 0, 5, 0);
-                                    c.gridy = 3;
-                                    c.gridwidth = 2;
-                                    add(textFieldRus, c);
-                                    c.insets = new Insets(10, 0, 5, 0);
-                                    c.gridy = 4;
-                                    c.gridwidth = 1;
-                                    add(buttonAdd, c);
-                                    c.gridy = 5;
-                                    c.gridwidth = 3;
-                                    add(labelLog, c);
                                 }
                             }
                             class PanelWordRemoval extends JPanel {
@@ -449,7 +514,7 @@ public class GuiMain {
                                                     try {
                                                         Thread.sleep(1000);
                                                     } catch (InterruptedException e1) {
-                                                        e1.printStackTrace();
+                                                        //it can't happen
                                                     }
                                                     labelLog.setForeground(Color.red);
                                                     labelLog.setText("");
@@ -604,7 +669,7 @@ public class GuiMain {
                                                         buttonYes.setEnabled(true);
                                                         buttonNo.setEnabled(true);
                                                     } catch (InterruptedException e) {
-                                                        e.printStackTrace();
+                                                        //it can't happen
                                                     }
                                                 }
                                             }).start();
@@ -620,7 +685,8 @@ public class GuiMain {
                                 }
                             }
                             add(new PanelVocab(), "Показать словарь");
-                            add(new PanelNewWordAddition(), "Добавить слово");
+                            add(new PanelNewTableAddition(), "Добавить из таблицы");
+                            add(new PanelNewOwnAddition(), "Добавить свое");
                             add(new PanelWordRemoval(), "Удалить слово");
                             add(new PanelAccountDeletion(), "Удалить аккаунт");
                             add(new PanelConfirmDeletion(), "Подтвердить удаление");
@@ -628,11 +694,13 @@ public class GuiMain {
                     }
                     class FunctionToolbar extends JToolBar {
                         public FunctionToolbar(PanelMenuInner panelMenuInner) {
-                            JButton buttonShowNewOwnWordAddition = new JButton("Добавить слово");
                             JButton buttonShowVocab = new JButton("Показать словарь");
+                            JButton buttonShowNewTableWordAddition = new JButton("Добавить из таблицы");
+                            JButton buttonShowNewOwnWordAddition = new JButton("Добавить свое");
                             JButton buttonShowWordRemoval = new JButton("Удалить слово");
                             JButton buttonShowAccountDeletion = new JButton("Удалить аккаунт");
                             add(buttonShowVocab);
+                            add(buttonShowNewTableWordAddition);
                             add(buttonShowNewOwnWordAddition);
                             add(buttonShowWordRemoval);
                             add(buttonShowAccountDeletion);
@@ -643,8 +711,9 @@ public class GuiMain {
                                     cl.show(panelMenuInner, e.getActionCommand());
                                 }
                             }
-                            buttonShowNewOwnWordAddition.addActionListener(new ToolBarInteract());
                             buttonShowVocab.addActionListener(new ToolBarInteract());
+                            buttonShowNewTableWordAddition.addActionListener(new ToolBarInteract());
+                            buttonShowNewOwnWordAddition.addActionListener(new ToolBarInteract());
                             buttonShowWordRemoval.addActionListener(new ToolBarInteract());
                             buttonShowAccountDeletion.addActionListener(new ToolBarInteract());
                         }
@@ -725,6 +794,7 @@ public class GuiMain {
                                                 Thread.sleep(500);
                                                 labelLog.setText("");
                                             } catch (InterruptedException e) {
+                                                //it can't happen
                                             }
                                         }
                                     }).start();
@@ -789,6 +859,7 @@ public class GuiMain {
                                                 Thread.sleep(500);
                                                 labelLog.setText("");
                                             } catch (InterruptedException e) {
+                                                //it can't happen
                                             }
                                         }
                                     }).start();

@@ -71,10 +71,6 @@ class Database {
         addNewAccount(nickname, password);
         createUserTable(nickname);
     }
-    public void deleteUser(String nickname) {
-        removeAccount(nickname);
-        deleteUserTable(nickname);
-    }
     public HashMap<String, String> getVocabulary(String nickname){
         HashMap<String, String> entireSessionVocabulary = new HashMap<>();
         try (Statement statement = connection.createStatement();

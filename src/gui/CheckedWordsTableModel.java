@@ -29,7 +29,4 @@ class CheckedWordsTableModel extends TableModelWords {
     public ArrayList<WordsPair> getCells() {
         return cells;
     }
-    public HashMap<String, String> getMap() {
-        return map;
-    }
 }
