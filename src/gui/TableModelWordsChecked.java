@@ -6,9 +6,9 @@ import java.util.HashMap;
 /**
  * Created by stoat on 12/1/16.
  */
-class CheckedWordsTableModel extends TableModelWords {
+class TableModelWordsChecked extends TableModelWords {
     private HashMap<String, String> map = new HashMap<>();
-    CheckedWordsTableModel(int capacity) {
+    TableModelWordsChecked(int capacity) {
         super(capacity);
     }
     public boolean containsKey(WordsPair wordsPair) {

@@ -21,7 +21,7 @@ public class GuiMain {
     private JTable tableVocab;
     private TableModelWords tableModelVocabulary;
     private JTable tableTraining;
-    private CheckedWordsTableModel tableModelTraining;
+    private TableModelWordsChecked tableModelTraining;
     private JLabel labelNickValue;
     private class AuthorizationPanel extends JPanel {
         AuthorizationPanel() {
@@ -96,7 +96,7 @@ public class GuiMain {
                                         tableModelVocabulary = new TableModelWords();
                                         tableModelVocabulary.setCells(entireSessionVocabulary);
                                         tableVocab.setModel(tableModelVocabulary);
-                                        tableModelTraining = new CheckedWordsTableModel(AMOUNT_OF_WORDS_FOR_TRAINING);
+                                        tableModelTraining = new TableModelWordsChecked(AMOUNT_OF_WORDS_FOR_TRAINING);
                                         tableTraining.setModel(tableModelTraining);
                                         labelNickValue.setText(nickname);
                                         new Thread(new Runnable() {

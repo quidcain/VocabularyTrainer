@@ -26,7 +26,7 @@ class TrainingLogic {
             return arrayList.get(currentIndex).rus;
     }
     public boolean isCorrectTranslation(String translation) {
-        boolean result = false;
+        boolean result;
         if (stage % 2 == 0)
             result = translation.equals(arrayList.get(currentIndex).rus);
         else
