@@ -70,7 +70,7 @@ class TrainingLogic {
                 else {
                     int confusingOption;
                     do {
-                        confusingOption = new Random().nextInt(5);
+                        confusingOption = new Random().nextInt(arrayList.size());
                     } while (setOptions.contains(arrayList.get(confusingOption).rus));
                     setOptions.add(arrayList.get(confusingOption).rus);
                     result[i] = arrayList.get(confusingOption).rus;

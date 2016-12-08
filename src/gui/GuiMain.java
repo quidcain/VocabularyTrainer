@@ -311,7 +311,7 @@ public class GuiMain {
                                                     return;
                                                 }
                                                 tableModelTraining.addRow(tableModelVocabulary.getRow(selectedRow));
-                                                buttonTrainingStart.setEnabled(tableModelTraining.getRowCount() == 5);
+                                                buttonTrainingStart.setEnabled(tableModelTraining.getRowCount() == AMOUNT_OF_WORDS_FOR_TRAINING);
                                             }
                                         }
                                     });
