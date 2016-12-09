@@ -293,7 +293,7 @@ public class GuiMain {
                                                 return;
                                             int nextSelect = (selectedRow < tableModelVocabulary.getRowCount() - 1 ? selectedRow + 1 : 0);
                                             tableVocab.setRowSelectionInterval(nextSelect, nextSelect);
-                                            if (tableModelTraining.getRowCount() < 5
+                                            if (tableModelTraining.getRowCount() < AMOUNT_OF_WORDS_FOR_TRAINING
                                                     && !tableModelTraining.containsKey(tableModelVocabulary.getRow(selectedRow))) {
                                                 if (tableModelTraining.containsValue(tableModelVocabulary.getRow(selectedRow))) {
                                                     labelLog.setText("Нельзя тренировать слова с одинаковым переводом");
