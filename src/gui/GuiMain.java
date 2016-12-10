@@ -938,8 +938,8 @@ public class GuiMain {
         mainPanel.add(new AfterAuthPanel(), "Smth another");
         frame = new JFrame("VocabularyTrainer");
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        frame.setSize(290, 330);
-        frame.setMinimumSize(new Dimension(290, 330));
+        frame.setSize(300, 340);
+        frame.setMinimumSize(new Dimension(300, 340));
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
         frame.add(mainPanel);
